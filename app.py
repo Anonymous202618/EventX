@@ -23,16 +23,27 @@ from models import (
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
+IS_VERCEL = os.getenv("VERCEL") == "1"
+
+if IS_VERCEL:
+    DB_PATH = Path("/tmp/eventx.db")
+    UPLOAD_PATH = Path("/tmp/eventx_uploads")
+else:
+    DB_PATH = BASE_DIR / "instance" / "eventx.db"
+    UPLOAD_PATH = BASE_DIR / "static" / "uploads"
+
 app = Flask(__name__)
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'instance' / 'eventx.db'}")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "DATABASE_URL",
+    f"sqlite:///{DB_PATH}"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["UPLOAD_FOLDER"] = str(BASE_DIR / "static" / "uploads")
+app.config["UPLOAD_FOLDER"] = str(UPLOAD_PATH)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
-Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
-Path(BASE_DIR / "instance").mkdir(parents=True, exist_ok=True)
-
+UPLOAD_PATH.mkdir(parents=True, exist_ok=True) 
 db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
