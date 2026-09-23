@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Pass{% endblock %}
+
+{% block content %}
+
+<div class="qr-pass-page">
+
+    <div class="container py-5">
+
+        <!-- TOP NAV -->
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
+
+            <a
+                href="{{ url_for('student_events') }}"
+                class="btn btn-ghost"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                My Events
+            </a>
+
+            <div class="d-flex gap-2">
+
+                <button
+                    type="button"
+                    class="btn btn-ghost"
+                    onclick="window.print()"
+                >
+                    <i class="bi bi-printer me-1"></i>
+                    Print
+                </button>
+
+                <a
+                    href="{{ url_for('student_qr_image', registration_id=registration.id) }}"
+                    class="btn btn-brand"
+                    download
+                >
+                    <i class="bi bi-download me-1"></i>
+                    Download QR
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- PASS -->
+        <div class="qr-pass-shell">
+
+            <!-- LEFT / MAIN -->
+            <div class="qr-pass-main">
+
+                <div class="qr-pass-brand">
+                    <span class="brand-dot"></span>
+                    EVENTX
+                </div>
+
+
+                <div class="qr-pass-heading">
+
+                    <div class="badge-soft mb-3">
+                        DIGITAL EVENT PASS
+                    </div>
+
+                    <h1>
+                        {{ event.title }}
+                    </h1>
+
+                    <p class="muted mb-0">
+                        Present this QR code at the event entrance for attendance verification.
+                    </p>
+
+                </div>
+
+
+                <!-- EVENT INFO -->
+                <div class="qr-event-info">
+
+                    <div class="qr-info-item">
+
+                        <div class="qr-info-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+
+                        <div>
+                            <div class="qr-info-label">
+                                DATE
+                            </div>
+
+                            <div class="qr-info-value">
+                                {{ event.start_datetime.strftime('%d %B %Y') }}
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="qr-info-item">
+
+                        <div class="qr-info-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+
+                        <div>
+                            <div class="qr-info-label">
+                                TIME
+                            </div>
+
+                            <div class="qr-info-value">
+                                {{ event.start_datetime.strftime('%I:%M %p') }}
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="qr-info-item">
+
+                        <div class="qr-info-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div>
+                            <div class="qr-info-label">
+                                VENUE
+                            </div>
+
+                            <div class="qr-info-value">
+                                {{ event.venue.name }}
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="qr-info-item">
+
+                        <div class="qr-info-icon">
+                            <i class="bi bi-tag"></i>
+                        </div>
+
+                        <div>
+                            <div class="qr-info-label">
+                                CATEGORY
+                            </div>
+
+                            <div class="qr-info-value">
+                                {{ event.category }}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- REGISTRATION -->
+                <div class="qr-registration-box">
+
+                    <div>
+
+                        <div class="qr-info-label">
+                            REGISTRATION ID
+                        </div>
+
+                        <div class="qr-registration-id" id="registrationId">
+                            {{ registration.registration_number }}
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-ghost"
+                        id="copyRegistrationId"
+                        title="Copy registration ID"
+                    >
+                        <i class="bi bi-copy me-1"></i>
+                        Copy
+                    </button>
+
+                </div>
+
+
+                <!-- JOURNEY -->
+                <div class="qr-pass-status">
+
+                    <div class="qr-status-title">
+                        PARTICIPATION STATUS
+                    </div>
+
+
+                    <div class="qr-status-track">
+
+                        <div class="qr-status-step completed">
+
+                            <div class="qr-status-icon">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+
+                            <span>
+                                Registered
+                            </span>
+
+                        </div>
+
+
+                        <div class="qr-status-line {% if registration.attendance %}completed{% endif %}"></div>
+
+
+                        <div class="qr-status-step {% if registration.attendance %}completed{% else %}pending{% endif %}">
+
+                            <div class="qr-status-icon">
+
+                                {% if registration.attendance %}
+                                    <i class="bi bi-check-lg"></i>
+                                {% else %}
+                                    <i class="bi bi-clock"></i>
+                                {% endif %}
+
+                            </div>
+
+                            <span>
+                                {% if registration.attendance %}
+                                    Attended
+                                {% else %}
+                                    Attendance Pending
+                                {% endif %}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT / QR -->
+            <div class="qr-pass-side">
+
+                <div class="qr-code-card">
+
+                    <div class="qr-code-header">
+                        <div class="small fw-bold">
+                            SCAN TO CHECK IN
+                        </div>
+
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+
+
+                    <div class="qr-code-frame">
+
+                        <img
+                            src="{{ url_for('student_qr_image', registration_id=registration.id) }}"
+                            alt="QR code for {{ registration.registration_number }}"
+                            class="qr-pass-code"
+                        >
+
+                    </div>
+
+
+                    <div class="qr-scan-note">
+                        <i class="bi bi-phone me-1"></i>
+                        Organizer can scan this code at the venue.
+                    </div>
+
+                </div>
+
+
+                <div class="qr-pass-student">
+
+                    <div class="avatar qr-student-avatar">
+                        {{ current_user.name[:1]|upper }}
+                    </div>
+
+                    <div>
+                        <div class="fw-bold">
+                            {{ current_user.name }}
+                        </div>
+
+                        <div class="muted small">
+                            {{ current_user.email }}
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="qr-validity-note">
+
+                    <i class="bi bi-shield-check"></i>
+
+                    <div>
+                        <div class="fw-bold">
+                            Valid registration
+                        </div>
+
+                        <div class="muted small">
+                            This pass is tied to your EventX registration.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BOTTOM TIP -->
+        <div class="text-center mt-4 muted small qr-print-note">
+
+            <i class="bi bi-lightbulb me-1"></i>
+
+            Keep this pass ready on your phone when you arrive at the venue.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const copyButton = document.getElementById("copyRegistrationId");
+    const registrationId = document.getElementById("registrationId");
+
+    if (!copyButton || !registrationId) {
+        return;
+    }
+
+    copyButton.addEventListener("click", async () => {
+
+        const value = registrationId.textContent.trim();
+
+        try {
+
+            await navigator.clipboard.writeText(value);
+
+            copyButton.innerHTML =
+                '<i class="bi bi-check-lg me-1"></i>Copied';
+
+            setTimeout(() => {
+                copyButton.innerHTML =
+                    '<i class="bi bi-copy me-1"></i>Copy';
+            }, 1600);
+
+        } catch (error) {
+
+            console.error("Could not copy registration ID.", error);
+
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

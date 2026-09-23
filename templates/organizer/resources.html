@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Resources{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <span class="badge rounded-pill px-3 py-2 mb-2"
+                  style="background:rgba(20,184,166,.12);color:var(--teal);">
+                EVENT RESOURCES
+            </span>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Request equipment and resources for your event.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('organizer_event', event_id=event.id) }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Event
+        </a>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-xl-7">
+
+            <div class="cardx p-4 p-lg-5">
+
+                <div class="small fw-bold muted mb-1">
+                    REQUEST RESOURCE
+                </div>
+
+                <h3 class="mb-2">
+                    Equipment & supplies
+                </h3>
+
+                <p class="muted mb-4">
+                    Submit a request for the resources your event needs.
+                </p>
+
+
+                <form method="post">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Resource
+                        </label>
+
+                        <select
+                            name="resource_id"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select a resource
+                            </option>
+
+                            {% for resource in resources %}
+
+                            <option value="{{ resource.id }}">
+
+                                {{ resource.name }}
+                                —
+                                {{ availability[resource.id] }}
+                                available
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Quantity
+                        </label>
+
+                        <input
+                            type="number"
+                            name="quantity"
+                            class="form-control"
+                            min="1"
+                            value="1"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand"
+                        {% if not resources %}disabled{% endif %}
+                    >
+                        <i class="bi bi-box-seam me-1"></i>
+                        Submit Request
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-5">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small fw-bold muted mb-1">
+                    EVENT SCHEDULE
+                </div>
+
+                <h4 class="mb-3">
+                    Resource availability
+                </h4>
+
+                <div class="stack">
+
+                    {% for resource in resources %}
+
+                    <div
+                        class="rounded-4 p-3"
+                        style="background:var(--surface2);border:1px solid var(--border);"
+                    >
+
+                        <div class="d-flex justify-content-between gap-3">
+
+                            <div>
+                                <div class="fw-semibold">
+                                    {{ resource.name }}
+                                </div>
+
+                                {% if resource.description %}
+                                <div class="small muted mt-1">
+                                    {{ resource.description }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-end">
+
+                                <div class="fw-bold"
+                                     style="color:var(--brand);">
+                                    {{ availability[resource.id] }}
+                                </div>
+
+                                <div class="small muted">
+                                    available
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="text-center p-4">
+                        <i class="bi bi-box-seam fs-2 muted"></i>
+                        <p class="muted mt-2 mb-0">
+                            No resources have been added by the administrator.
+                        </p>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="cardx mt-4 overflow-hidden">
+
+        <div class="p-4"
+             style="border-bottom:1px solid var(--border);">
+
+            <div class="small fw-bold muted mb-1">
+                MY REQUESTS
+            </div>
+
+            <h4 class="mb-1">
+                Resource requests
+            </h4>
+
+            <p class="muted small mb-0">
+                Track the approval status of resources requested for this event.
+            </p>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table mb-0" id="resourceRequestsTable">
+
+                <thead>
+                    <tr>
+                        <th>Resource</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in requests %}
+
+                    <tr>
+
+                        <td>
+                            <div class="fw-semibold">
+                                {{ item.resource.name }}
+                            </div>
+
+                            {% if item.resource.description %}
+                            <div class="small muted">
+                                {{ item.resource.description }}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ item.quantity }}
+                        </td>
+
+                        <td>
+
+                            {% if item.status == "approved" %}
+
+                            <span class="badge rounded-pill"
+                                  style="background:rgba(20,184,166,.12);color:var(--teal);">
+                                Approved
+                            </span>
+
+                            {% elif item.status == "rejected" %}
+
+                            <span class="badge rounded-pill"
+                                  style="background:rgba(239,68,68,.12);color:var(--danger);">
+                                Rejected
+                            </span>
+
+                            {% else %}
+
+                            <span class="badge rounded-pill"
+                                  style="background:rgba(245,158,11,.12);color:var(--amber);">
+                                Pending
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="3">
+
+                            <div class="text-center p-5">
+
+                                <i class="bi bi-box-seam fs-2 muted"></i>
+
+                                <h5 class="mt-3 mb-2">
+                                    No resource requests yet
+                                </h5>
+
+                                <p class="muted small mb-0">
+                                    Request equipment above to get started.
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<style>
+
+#resourceRequestsTable {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    color: var(--text) !important;
+    background: var(--surface) !important;
+}
+
+#resourceRequestsTable > :not(caption) > * > * {
+    color: var(--text) !important;
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+#resourceRequestsTable thead th {
+    color: var(--muted) !important;
+    background: var(--surface2) !important;
+}
+
+#resourceRequestsTable tbody tr:hover td {
+    background: var(--surface2) !important;
+    color: var(--text) !important;
+}
+
+</style>
+
+{% endblock %}

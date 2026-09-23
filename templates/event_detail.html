@@ -1,0 +1,860 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ event.title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4">
+
+    <!-- =====================================================
+         EVENT HERO
+    ====================================================== -->
+
+    <div class="cardx overflow-hidden event-detail-card">
+
+        <div class="row g-0">
+
+            <!-- =================================================
+                 EVENT POSTER
+            ================================================== -->
+
+            <div class="col-lg-7">
+
+                {% if event.banner %}
+
+                <div class="event-detail-image-wrap">
+
+                    <img
+                        src="{{ url_for('static', filename=event.banner) }}"
+                        class="w-100 h-100 object-fit-cover event-detail-image"
+                        style="min-height:420px"
+                        alt="{{ event.title }}"
+                    >
+
+                    <div class="event-detail-image-overlay"></div>
+
+                    <span class="event-detail-category">
+                        {{ event.category }}
+                    </span>
+
+                </div>
+
+                {% else %}
+
+                <div
+                    class="event-placeholder h-100"
+                    style="min-height:420px"
+                >
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- =================================================
+                 EVENT INFORMATION
+            ================================================== -->
+
+            <div class="col-lg-5 p-4 p-lg-5">
+
+                <!-- Category -->
+
+                <span class="badge-soft">
+                    {{ event.category }} · {{ event.event_type }}
+                </span>
+
+
+                <!-- Title -->
+
+                <h1 class="page-title mt-3">
+                    {{ event.title }}
+                </h1>
+
+
+                <!-- Description -->
+
+                <p class="muted mt-3">
+                    {{ event.description }}
+                </p>
+
+
+                <!-- =================================================
+                     EVENT INFORMATION
+                ================================================== -->
+
+                <div class="stack mt-4">
+
+                    <!-- Date -->
+
+                    <div>
+
+                        <i class="bi bi-calendar3 me-2"></i>
+
+                        <strong>
+                            {{ event.start_datetime.strftime('%A, %d %B %Y') }}
+                        </strong>
+
+                        <div class="muted ms-4">
+
+                            {{ event.start_datetime.strftime('%I:%M %p') }}
+
+                            –
+
+                            {{ event.end_datetime.strftime('%I:%M %p') }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Venue -->
+
+                    <div>
+
+                        <i class="bi bi-geo-alt me-2"></i>
+
+                        <strong>
+                            {{ event.venue.name }}
+                        </strong>
+
+                        <div class="muted ms-4">
+                            {{ event.venue.location }}
+                        </div>
+
+                    </div>
+
+
+                    <!-- Participants -->
+
+                    <div>
+
+                        <i class="bi bi-people me-2"></i>
+
+                        <strong>
+                            {{ event.active_registrations }}/{{ event.max_participants }}
+                        </strong>
+
+                        <div class="muted ms-4">
+
+                            registered
+
+                            ·
+
+                            {{ event.waitlist_count }}
+
+                            waitlisted
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     REGISTRATION PROGRESS
+                ================================================== -->
+
+                <div class="progress mt-4">
+
+                    <div
+                        class="progress-bar"
+                        style="width:{{ event.progress_percent }}%"
+                    ></div>
+
+                </div>
+
+
+                <!-- =================================================
+                     EVENT COUNTDOWN
+                ================================================== -->
+
+                <div class="countdown-box mt-4">
+
+                    <div class="countdown-label">
+                        EVENT STARTS IN
+                    </div>
+
+                    <div
+                        id="eventCountdown"
+                        data-start="{{ event.start_datetime.isoformat() }}"
+                        class="countdown-time"
+                    >
+                        Loading...
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     STUDENT REGISTRATION
+                ================================================== -->
+
+                {% if current_user.is_authenticated and current_user.role == 'student' %}
+
+                    <div class="mt-4">
+
+                        {% if registration and registration.status == 'registered' %}
+
+                            <!-- =====================================
+                                 REGISTRATION CONFIRMED
+                            ====================================== -->
+
+                            <div
+                                class="cardx p-3 registration-success-card"
+                            >
+
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-center
+                                           gap-3"
+                                >
+
+                                    <!-- Success information -->
+
+                                    <div
+                                        class="d-flex
+                                               align-items-center
+                                               gap-3"
+                                    >
+
+                                        <div
+                                            class="registration-success-icon"
+                                        >
+                                            <i class="bi bi-check-lg"></i>
+                                        </div>
+
+
+                                        <div>
+
+                                            <div class="fw-bold">
+                                                Registration confirmed
+                                            </div>
+
+                                            <small class="muted">
+                                                {{ registration.registration_number }}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- My Pass -->
+
+                                    <a
+                                        href="{{ url_for('student_events') }}"
+                                        class="btn btn-brand"
+                                    >
+                                        My Pass
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+
+                        {% elif registration and registration.status == 'waitlisted' %}
+
+                            <!-- =====================================
+                                 WAITLIST
+                            ====================================== -->
+
+                            <div
+                                class="alert alert-warning rounded-4"
+                            >
+                                <i class="bi bi-hourglass-split me-2"></i>
+
+                                You are currently on the waitlist.
+                            </div>
+
+
+                        {% else %}
+
+                            <!-- =====================================
+                                 REGISTER
+                            ====================================== -->
+
+                            <form
+                                class="registration-form"
+                                method="post"
+                                action="{{ url_for('student_register_event', event_id=event.id) }}"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-brand btn-lg w-100 btn-register"
+                                >
+
+                                    <span class="register-text">
+                                        Register Now
+                                    </span>
+
+                                    <i
+                                        class="bi bi-arrow-right ms-1 register-arrow"
+                                    ></i>
+
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </div>
+
+
+                {% else %}
+
+                    <!-- =============================================
+                         NOT LOGGED IN
+                    ============================================== -->
+
+                    <div class="mt-4">
+
+                        <a
+                            href="{{ url_for('login') }}"
+                            class="btn btn-brand btn-lg w-100"
+                        >
+                            Login to Register
+
+                            <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EVENT INFORMATION
+    ====================================================== -->
+
+    <div class="row g-4 mt-1">
+
+
+        <!-- =================================================
+             ABOUT EVENT
+        ================================================== -->
+
+        <div class="col-lg-8">
+
+            <div class="cardx p-4">
+
+                <div class="muted small fw-bold">
+                    EVENT INFO
+                </div>
+
+                <h3 class="mt-2">
+                    About the event
+                </h3>
+
+                <p class="muted">
+                    {{ event.description }}
+                </p>
+
+                <hr>
+
+
+                <!-- Eligibility + Organizer -->
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <div class="muted small">
+                            Eligibility
+                        </div>
+
+                        <strong>
+                            {{ event.eligibility }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="muted small">
+                            Organizer
+                        </div>
+
+                        <strong>
+                            {{ event.club.name if event.club else event.organizer.name }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+       <!-- =================================================
+     FEEDBACK
+================================================== -->
+
+<div class="col-lg-4">
+
+    <div class="cardx p-4 feedback-card">
+
+        <div class="muted small fw-bold">
+            FEEDBACK
+        </div>
+
+
+        <!-- AVERAGE RATING -->
+
+        <div class="feedback-average">
+
+            <div class="feedback-average-number">
+                {{ avg_rating if avg_rating else '—' }}
+            </div>
+
+            <div>
+
+                <div class="feedback-stars-display">
+
+                    {% set average = avg_rating|round|int %}
+
+                    {% for i in range(1, 6) %}
+
+                        {% if i <= average %}
+                            <i class="bi bi-star-fill"></i>
+                        {% else %}
+                            <i class="bi bi-star"></i>
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                <div class="muted small">
+                    Average participant rating
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if current_user.is_authenticated
+              and current_user.role == 'student' %}
+
+
+            {% if feedback_submitted %}
+
+                <!-- FEEDBACK ALREADY SUBMITTED -->
+
+                <div class="feedback-submitted-box">
+
+                    <div class="feedback-submitted-icon">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            Feedback submitted
+                        </div>
+
+                        <div class="muted small">
+                            Thank you for helping improve future events.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            {% elif registration and registration.attendance %}
+
+                <!-- FEEDBACK FORM -->
+
+                <div class="feedback-divider"></div>
+
+                <div class="feedback-form-heading">
+
+                    <h5 class="mb-1">
+                        How was your experience?
+                    </h5>
+
+                    <p class="muted small mb-3">
+                        Your feedback helps the organizers improve future events.
+                    </p>
+
+                </div>
+
+
+                <form
+                    method="post"
+                    action="{{ url_for('submit_feedback', event_id=event.id) }}"
+                    id="feedbackForm"
+                >
+
+                    <!-- RATING -->
+
+                    <div class="feedback-field">
+
+                        <label class="feedback-label">
+                            Overall experience
+                        </label>
+
+
+                        <div
+                            class="rating-picker"
+                            id="ratingPicker"
+                            role="radiogroup"
+                            aria-label="Overall experience rating"
+                        >
+
+                            {% for i in range(1, 6) %}
+
+                                <button
+                                    type="button"
+                                    class="rating-star"
+                                    data-rating="{{ i }}"
+                                    aria-label="{{ i }} out of 5 stars"
+                                >
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            name="rating"
+                            id="ratingValue"
+                            value="5"
+                        >
+
+
+                        <div
+                            class="rating-helper"
+                            id="ratingHelper"
+                        >
+                            5 — Excellent
+                        </div>
+
+                    </div>
+
+
+                    <!-- COMMENT -->
+
+                    <div class="feedback-field mt-3">
+
+                        <label
+                            for="feedbackComment"
+                            class="feedback-label"
+                        >
+                            Additional comments
+                        </label>
+
+
+                        <textarea
+                            class="form-control"
+                            id="feedbackComment"
+                            name="comment"
+                            rows="4"
+                            maxlength="1000"
+                            placeholder="Tell us what you liked or what could be improved..."
+                        ></textarea>
+
+
+                        <div class="feedback-character-count">
+                            <span id="feedbackCharacterCount">0</span>/1000
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand w-100 mt-3 feedback-submit-btn"
+                    >
+                        <i class="bi bi-send me-1"></i>
+                        Submit Feedback
+                    </button>
+
+                </form>
+
+
+            {% elif registration and registration.status == 'registered' %}
+
+                <!-- WAITING FOR ATTENDANCE -->
+
+                <div class="feedback-locked-box">
+
+                    <div class="feedback-locked-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            Feedback unlocks after attendance
+                        </div>
+
+                        <div class="muted small">
+                            Attend the event first, then return here to share your experience.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            {% else %}
+
+                <!-- NOT REGISTERED -->
+
+                <div class="feedback-locked-box">
+
+                    <div class="feedback-locked-icon">
+                        <i class="bi bi-lock"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="fw-bold">
+                            Register to participate
+                        </div>
+
+                        <div class="muted small">
+                            Feedback becomes available after you attend the event.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% if gallery %}
+
+<!-- =====================================================
+     EVENT GALLERY
+====================================================== -->
+
+<div class="cardx p-4 p-lg-5 mt-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+
+        <div>
+
+            <div class="muted small fw-bold">
+                EVENT GALLERY
+            </div>
+
+            <h3 class="mt-2 mb-1">
+                Moments from the event
+            </h3>
+
+            <p class="muted mb-0">
+                {{ gallery|length }}
+                photo{% if gallery|length != 1 %}s{% endif %}
+                shared by the organizer.
+            </p>
+
+        </div>
+
+        <div class="rounded-3 d-flex align-items-center justify-content-center"
+             style="width:44px;height:44px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+            <i class="bi bi-images fs-5"></i>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-3">
+
+        {% for image in gallery %}
+
+        <div class="col-6 col-md-4 col-xl-3">
+
+            <button
+                type="button"
+                class="border-0 p-0 w-100 bg-transparent text-start gallery-image-button"
+                data-bs-toggle="modal"
+                data-bs-target="#eventGalleryModal"
+                data-gallery-image="{{ url_for('static', filename=image.image_path) }}"
+                data-gallery-caption="{{ image.caption }}"
+            >
+
+                <div class="rounded-4 overflow-hidden"
+                     style="aspect-ratio:4/3;background:var(--surface2);border:1px solid var(--border);">
+
+                    <img
+                        src="{{ url_for('static', filename=image.image_path) }}"
+                        alt="{{ image.caption or event.title }}"
+                        loading="lazy"
+                        class="w-100 h-100"
+                        style="object-fit:cover;"
+                    >
+
+                </div>
+
+            </button>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     GALLERY PREVIEW MODAL
+====================================================== -->
+
+<div
+    class="modal fade"
+    id="eventGalleryModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content"
+             style="background:var(--surface);color:var(--text);border:1px solid var(--border);">
+
+            <div class="modal-header"
+                 style="border-color:var(--border);">
+
+                <h5 class="modal-title">
+                    Event Gallery
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+
+            </div>
+
+            <div class="modal-body p-2 p-md-3">
+
+                <div
+                    class="rounded-4 overflow-hidden"
+                    style="background:var(--surface2);"
+                >
+
+                    <img
+                        id="galleryModalImage"
+                        src=""
+                        alt="Event gallery image"
+                        class="w-100"
+                        style="max-height:75vh;object-fit:contain;"
+                    >
+
+                </div>
+
+                <div
+                    id="galleryModalCaption"
+                    class="muted text-center py-3 px-2"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const galleryModal =
+        document.getElementById("eventGalleryModal");
+
+    const modalImage =
+        document.getElementById("galleryModalImage");
+
+    const modalCaption =
+        document.getElementById("galleryModalCaption");
+
+
+    if (!galleryModal) {
+        return;
+    }
+
+
+    galleryModal.addEventListener(
+        "show.bs.modal",
+        function (event) {
+
+            const button =
+                event.relatedTarget;
+
+            if (!button) {
+                return;
+            }
+
+
+            const image =
+                button.getAttribute(
+                    "data-gallery-image"
+                );
+
+            const caption =
+                button.getAttribute(
+                    "data-gallery-caption"
+                );
+
+
+            modalImage.src =
+                image || "";
+
+            modalCaption.textContent =
+                caption || "";
+
+        }
+    );
+
+
+    galleryModal.addEventListener(
+        "hidden.bs.modal",
+        function () {
+
+            modalImage.src = "";
+            modalCaption.textContent = "";
+
+        }
+    );
+
+});
+</script>
+
+{% endif %}
+
+{% endblock %}

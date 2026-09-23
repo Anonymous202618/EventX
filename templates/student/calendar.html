@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Calendar
+{% endblock %}
+
+
+{% block head %}
+
+<link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.css"
+    rel="stylesheet"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-head">
+
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    SCHEDULE
+                </div>
+
+                <h1 class="page-title mb-2">
+                    Event calendar
+                </h1>
+
+                <p class="muted mb-0">
+                    View your registered events and upcoming campus activities.
+                </p>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('events') }}"
+                class="btn btn-brand"
+            >
+                <i class="bi bi-search me-1"></i>
+                Discover Events
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CALENDAR
+    ====================================================== -->
+
+    <div class="cardx calendar-shell">
+
+        <div class="calendar-toolbar">
+
+            <div class="calendar-toolbar-left">
+
+                <div class="calendar-title-block">
+
+                    <div class="calendar-title-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="calendar-toolbar-title">
+                            Your schedule
+                        </div>
+
+                        <div class="muted small">
+                            Click an event to view its details
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="calendar-legend">
+
+                <span class="calendar-legend-item">
+                    <span class="calendar-dot registered"></span>
+                    Registered
+                </span>
+
+                <span class="calendar-legend-item">
+                    <span class="calendar-dot event"></span>
+                    Campus event
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="calendar-wrapper">
+
+            <div id="calendar"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js"></script>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const calendarElement =
+        document.getElementById("calendar");
+
+    if (!calendarElement) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch("/api/calendar");
+
+
+        if (!response.ok) {
+            throw new Error(
+                `Calendar request failed: ${response.status}`
+            );
+        }
+
+
+        const events =
+            await response.json();
+
+
+        const calendar =
+            new FullCalendar.Calendar(
+                calendarElement,
+                {
+
+                    initialView: "dayGridMonth",
+
+                    height: "auto",
+
+                    contentHeight: "auto",
+
+                    expandRows: true,
+
+                    fixedWeekCount: false,
+
+                    dayMaxEvents: 3,
+
+                    moreLinkClick: "popover",
+
+                    nowIndicator: true,
+
+                    eventDisplay: "block",
+
+                    displayEventTime: true,
+
+                    eventTimeFormat: {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        meridiem: "short"
+                    },
+
+
+                    headerToolbar: {
+
+                        left: "prev,next today",
+
+                        center: "title",
+
+                        right: "dayGridMonth,timeGridWeek,listMonth"
+
+                    },
+
+
+                    buttonText: {
+
+                        today: "Today",
+
+                        month: "Month",
+
+                        week: "Week",
+
+                        list: "Agenda"
+
+                    },
+
+
+                    events: events,
+
+
+                    eventClick: (info) => {
+
+                        info.jsEvent.preventDefault();
+
+
+                        if (info.event.url) {
+
+                            window.location.href =
+                                info.event.url;
+
+                        }
+
+                    },
+
+
+                    eventMouseEnter: (info) => {
+
+                        info.el.classList.add(
+                            "calendar-event-hover"
+                        );
+
+                    },
+
+
+                    eventMouseLeave: (info) => {
+
+                        info.el.classList.remove(
+                            "calendar-event-hover"
+                        );
+
+                    },
+
+
+                    eventDidMount: (info) => {
+
+                        const event =
+                            info.event;
+
+
+                        if (event.title) {
+
+                            info.el.setAttribute(
+                                "title",
+                                event.title
+                            );
+
+                        }
+
+                    },
+
+
+                    datesSet: () => {
+
+                        requestAnimationFrame(() => {
+
+                            calendarElement.classList.add(
+                                "calendar-ready"
+                            );
+
+                        });
+
+                    }
+
+                }
+
+            );
+
+
+        calendar.render();
+
+
+    } catch (error) {
+
+        console.error(
+            "Could not load calendar:",
+            error
+        );
+
+
+        calendarElement.innerHTML = `
+
+            <div class="calendar-error">
+
+                <div class="calendar-error-icon">
+                    <i class="bi bi-calendar-x"></i>
+                </div>
+
+                <h5>
+                    Calendar could not be loaded
+                </h5>
+
+                <p class="muted mb-0">
+                    Please refresh the page and try again.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+<div class="cardx event-card">
+
+    <!-- =========================
+         EVENT POSTER
+    ========================== -->
+
+    <a
+        href="{{ url_for('event_detail', event_id=event.id) }}"
+        class="event-card-image-link"
+    >
+
+        <div class="event-card-image-wrap">
+
+            {% if event.banner %}
+
+                <img
+                    class="event-image"
+                    src="{{ url_for('static', filename=event.banner) }}"
+                    alt="{{ event.title }}"
+                >
+
+            {% else %}
+
+                <div class="event-placeholder">
+                    <i class="bi bi-calendar2-event"></i>
+                </div>
+
+            {% endif %}
+
+
+            <!-- Category badge -->
+
+            <span
+                class="badge-soft
+                       category-badge
+                       category-{{ event.category|lower|replace(' ', '-') }}"
+            >
+                {{ event.category }}
+            </span>
+
+
+            <!-- Hover arrow -->
+
+            <span class="event-hover-arrow">
+                <i class="bi bi-arrow-up-right"></i>
+            </span>
+
+        </div>
+
+    </a>
+
+
+    <!-- =========================
+         EVENT INFORMATION
+    ========================== -->
+
+    <div class="p-3 p-lg-4">
+
+        <div
+            class="d-flex
+                   justify-content-between
+                   align-items-center
+                   gap-2"
+        >
+
+            <span class="muted small">
+                {{ event.event_type }}
+            </span>
+
+            <span class="muted small">
+                <i class="bi bi-people me-1"></i>
+                {{ event.active_registrations }}/{{ event.max_participants }}
+            </span>
+
+        </div>
+
+
+        <!-- Title -->
+
+        <h4 class="mt-2 mb-2">
+
+            <a
+                class="text-decoration-none event-title-link"
+                href="{{ url_for('event_detail', event_id=event.id) }}"
+            >
+                {{ event.title }}
+            </a>
+
+        </h4>
+
+
+        <!-- Date -->
+
+        <div class="muted small">
+
+            <i class="bi bi-calendar3 me-1"></i>
+
+            {{ event.start_datetime.strftime('%d %b, %I:%M %p') }}
+
+        </div>
+
+
+        <!-- Venue -->
+
+        <div class="muted small mt-1">
+
+            <i class="bi bi-geo-alt me-1"></i>
+
+            {{ event.venue.name }}
+
+        </div>
+
+
+        <!-- Registration progress -->
+
+        <div class="progress mt-3">
+
+            <div
+                class="progress-bar"
+                style="width: {{ event.progress_percent }}%"
+            ></div>
+
+        </div>
+
+
+        <!-- Registration numbers -->
+
+        <div
+            class="d-flex
+                   justify-content-between
+                   mt-2
+                   small"
+        >
+
+            <span>
+                {{ event.active_registrations }} joined
+            </span>
+
+            <span class="fw-bold">
+                {{ event.progress_percent }}%
+            </span>
+
+        </div>
+
+
+        <!-- View Event Button -->
+
+        <a
+            href="{{ url_for('event_detail', event_id=event.id) }}"
+            class="btn btn-brand w-100 mt-3 event-view-btn"
+        >
+            View Event
+
+            <i class="bi bi-arrow-right ms-1"></i>
+
+        </a>
+
+    </div>
+
+</div>

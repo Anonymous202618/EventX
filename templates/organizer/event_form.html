@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Event{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xxl-11">
+
+            <!-- Header -->
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background: rgba(91,75,219,.10); color: var(--brand);">
+                            NEW EVENT
+                        </span>
+
+                        <span class="small muted">
+                            Organizer workspace
+                        </span>
+                    </div>
+
+                    <h1 class="page-title mb-2">Create an event</h1>
+
+                    <p class="muted mb-0">
+                        Add the event details below. After submission, the event will enter
+                        the admin approval workflow.
+                    </p>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small muted">Step</span>
+                    <span class="fw-bold">1 of 1</span>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" id="eventForm">
+
+                <div class="row g-4">
+
+                    <!-- Main form -->
+                    <div class="col-xl-8">
+
+                        <!-- Basic Information -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width:42px;height:42px;background:rgba(91,75,219,.10);color:var(--brand);">
+                                    <i class="bi bi-pencil-square fs-5"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-1">Basic information</h5>
+                                    <p class="muted small mb-0">
+                                        Give students the essential information about your event.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">
+                                        Event title
+                                    </label>
+
+                                    <input
+                                        class="form-control form-control-lg"
+                                        name="title"
+                                        placeholder="e.g. Campus Hackathon 2026"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Category
+                                    </label>
+
+                                    <select class="form-select form-select-lg" name="category">
+                                        <option>Technical</option>
+                                        <option>Competition</option>
+                                        <option>Workshop</option>
+                                        <option>Cultural</option>
+                                        <option>Sports</option>
+                                        <option>Seminar</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Description
+                                    </label>
+
+                                    <textarea
+                                        class="form-control"
+                                        rows="6"
+                                        name="description"
+                                        placeholder="Describe what the event is about, what students will experience, and why they should attend..."
+                                        required
+                                    ></textarea>
+
+                                    <div class="form-text muted">
+                                        Keep the description clear and useful for students.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Event type
+                                    </label>
+
+                                    <select class="form-select" name="event_type">
+                                        <option>Workshop</option>
+                                        <option>Hackathon</option>
+                                        <option>Talk</option>
+                                        <option>Open Mic</option>
+                                        <option>Seminar</option>
+                                        <option>Competition</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Club
+                                    </label>
+
+                                    <select class="form-select" name="club_id">
+                                        {% for c in clubs %}
+                                            <option value="{{ c.id }}">
+                                                {{ c.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- Schedule -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width:42px;height:42px;background:rgba(245,158,11,.12);color:var(--amber);">
+                                    <i class="bi bi-calendar3 fs-5"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-1">Schedule</h5>
+                                    <p class="muted small mb-0">
+                                        Set when the event starts, ends, and stops accepting registrations.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Start
+                                    </label>
+
+                                    <input
+                                        class="form-control"
+                                        name="start_datetime"
+                                        type="datetime-local"
+                                        id="start_datetime"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        End
+                                    </label>
+
+                                    <input
+                                        class="form-control"
+                                        name="end_datetime"
+                                        type="datetime-local"
+                                        id="end_datetime"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Registration deadline
+                                    </label>
+
+                                    <input
+                                        class="form-control"
+                                        name="registration_deadline"
+                                        type="datetime-local"
+                                        id="registration_deadline"
+                                        required
+                                    >
+                                </div>
+
+                            </div>
+
+                            <div class="mt-3 p-3 rounded-3"
+                                 style="background:var(--surface2);">
+                                <div class="d-flex gap-2 align-items-start">
+                                    <i class="bi bi-info-circle mt-1"
+                                       style="color:var(--brand);"></i>
+
+                                    <div class="small muted">
+                                        Registration should close before the event begins.
+                                        Make sure the event duration and deadline are consistent.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Venue & Capacity -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width:42px;height:42px;background:rgba(20,184,166,.10);color:var(--teal);">
+                                    <i class="bi bi-geo-alt fs-5"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-1">Venue & capacity</h5>
+                                    <p class="muted small mb-0">
+                                        Tell students where the event will happen and how many can attend.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">
+                                        Venue
+                                    </label>
+
+                                    <select class="form-select" name="venue_id">
+                                        {% for v in venues %}
+                                            <option value="{{ v.id }}">
+                                                {{ v.name }} · {{ v.capacity }} seats
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Capacity
+                                    </label>
+
+                                    <div class="input-group">
+                                        <input
+                                            class="form-control"
+                                            name="max_participants"
+                                            type="number"
+                                            min="1"
+                                            placeholder="100"
+                                            required
+                                        >
+                                        <span class="input-group-text">students</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Eligibility
+                                    </label>
+
+                                    <input
+                                        class="form-control"
+                                        name="eligibility"
+                                        value="All students"
+                                        placeholder="e.g. All students"
+                                    >
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- Banner -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width:42px;height:42px;background:rgba(255,107,107,.10);color:var(--coral);">
+                                    <i class="bi bi-image fs-5"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-1">Event banner</h5>
+                                    <p class="muted small mb-0">
+                                        Add a poster or banner that students will see across EventX.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <label class="form-label fw-semibold">
+                                Banner image
+                            </label>
+
+                            <input
+                                class="form-control"
+                                type="file"
+                                name="banner"
+                                id="bannerInput"
+                                accept="image/*"
+                            >
+
+                            <div class="form-text muted">
+                                Recommended: a clear landscape event poster. Images only.
+                            </div>
+
+                            <!-- Preview -->
+                            <div id="bannerPreviewWrap" class="d-none mt-4">
+                                <div class="small fw-semibold mb-2">
+                                    Preview
+                                </div>
+
+                                <div class="rounded-4 overflow-hidden"
+                                     style="background:var(--surface2);border:1px solid var(--border);">
+                                    <img
+                                        id="bannerPreview"
+                                        src=""
+                                        alt="Banner preview"
+                                        class="w-100"
+                                        style="max-height:320px;object-fit:cover;"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Submit -->
+                        <div class="cardx p-4">
+                            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+
+                                <div>
+                                    <div class="fw-semibold mb-1">
+                                        Ready to submit?
+                                    </div>
+
+                                    <div class="small muted">
+                                        Your event will be sent to an administrator for approval.
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-brand btn-lg px-4"
+                                    id="submitEventBtn"
+                                >
+                                    <i class="bi bi-send me-2"></i>
+                                    Submit for Approval
+                                </button>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Right sidebar -->
+                    <div class="col-xl-4">
+
+                        <!-- Workflow -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <i class="bi bi-diagram-3"
+                                   style="color:var(--brand);"></i>
+                                <h5 class="mb-0">What happens next?</h5>
+                            </div>
+
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:34px;height:34px;background:rgba(91,75,219,.12);color:var(--brand);">
+                                        <span class="fw-bold small">1</span>
+                                    </div>
+
+                                    <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+                                </div>
+
+                                <div class="pb-1">
+                                    <div class="fw-semibold">Submit event</div>
+                                    <div class="small muted mt-1">
+                                        Complete the form and send it for review.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="d-flex flex-column align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:34px;height:34px;background:rgba(245,158,11,.12);color:var(--amber);">
+                                        <span class="fw-bold small">2</span>
+                                    </div>
+
+                                    <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+                                </div>
+
+                                <div class="pb-1">
+                                    <div class="fw-semibold">Admin review</div>
+                                    <div class="small muted mt-1">
+                                        An administrator checks the submitted event.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3">
+                                <div>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width:34px;height:34px;background:rgba(16,185,129,.12);color:var(--success);">
+                                        <span class="fw-bold small">3</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="fw-semibold">Publish & register</div>
+                                    <div class="small muted mt-1">
+                                        Once approved, students can discover and register for the event.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Checklist -->
+                        <div class="cardx p-4 mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-check2-circle"
+                                   style="color:var(--success);"></i>
+                                <h5 class="mb-0">Before submitting</h5>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-start mb-3">
+                                <i class="bi bi-check-circle"
+                                   style="color:var(--success);"></i>
+                                <span class="small muted">
+                                    Use a clear event title.
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-start mb-3">
+                                <i class="bi bi-check-circle"
+                                   style="color:var(--success);"></i>
+                                <span class="small muted">
+                                    Check the start and end times.
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-start mb-3">
+                                <i class="bi bi-check-circle"
+                                   style="color:var(--success);"></i>
+                                <span class="small muted">
+                                    Set a registration deadline before the event.
+                                </span>
+                            </div>
+
+                            <div class="d-flex gap-2 align-items-start">
+                                <i class="bi bi-check-circle"
+                                   style="color:var(--success);"></i>
+                                <span class="small muted">
+                                    Choose a venue with enough capacity.
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <!-- Status note -->
+                        <div class="cardx p-4"
+                             style="border-left:4px solid var(--brand);">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-shield-check fs-4"
+                                   style="color:var(--brand);"></i>
+
+                                <div>
+                                    <div class="fw-semibold mb-1">
+                                        Approval required
+                                    </div>
+
+                                    <div class="small muted">
+                                        Creating an event does not publish it immediately.
+                                        It first enters the administrator approval workflow.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("eventForm");
+    const submitBtn = document.getElementById("submitEventBtn");
+
+    const startInput = document.getElementById("start_datetime");
+    const endInput = document.getElementById("end_datetime");
+    const deadlineInput = document.getElementById("registration_deadline");
+
+    const bannerInput = document.getElementById("bannerInput");
+    const bannerPreviewWrap = document.getElementById("bannerPreviewWrap");
+    const bannerPreview = document.getElementById("bannerPreview");
+
+
+    // Keep date fields logically ordered.
+    function updateDateLimits() {
+        if (!startInput.value) {
+            return;
+        }
+
+        endInput.min = startInput.value;
+        deadlineInput.max = startInput.value;
+    }
+
+    startInput.addEventListener("change", function () {
+        updateDateLimits();
+    });
+
+
+    // Banner image preview.
+    bannerInput.addEventListener("change", function () {
+
+        const file = this.files && this.files[0];
+
+        if (!file) {
+            bannerPreviewWrap.classList.add("d-none");
+            bannerPreview.removeAttribute("src");
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            bannerPreviewWrap.classList.add("d-none");
+            bannerPreview.removeAttribute("src");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            bannerPreview.src = event.target.result;
+            bannerPreviewWrap.classList.remove("d-none");
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+
+    // Prevent accidental double submission.
+    form.addEventListener("submit", function () {
+
+        if (!form.checkValidity()) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"
+                  aria-hidden="true"></span>
+            Submitting...
+        `;
+    });
+
+
+    updateDateLimits();
+});
+</script>
+
+{% endblock %}

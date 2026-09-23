@@ -1,0 +1,522 @@
+{% extends 'base.html' %}
+
+{% block title %}Venues{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(255,107,107,.10);color:var(--coral);">
+                    VENUE MANAGEMENT
+                </span>
+
+                <span class="small muted">
+                    Administration
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                Venues
+            </h1>
+
+            <p class="muted mb-0">
+                Manage the spaces available for campus events and their seating capacity.
+            </p>
+        </div>
+
+
+        <div class="cardx px-4 py-3">
+
+            <div class="small muted">
+                Total venues
+            </div>
+
+            <div class="fs-3 fw-bold mt-1">
+                {{ venues|length }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Add venue -->
+        <div class="col-xl-4">
+
+            <div class="cardx p-4 p-lg-5 h-100">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                        <i class="bi bi-plus-lg fs-5"></i>
+
+                    </div>
+
+                    <div>
+                        <div class="small fw-bold muted">
+                            NEW VENUE
+                        </div>
+
+                        <h4 class="mb-0">
+                            Add a venue
+                        </h4>
+                    </div>
+
+                </div>
+
+
+                <p class="muted small mb-4">
+                    Add a campus space that organizers can select while creating events.
+                </p>
+
+
+                <form method="post"
+                      action="{{ url_for('add_venue') }}"
+                      id="addVenueForm">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Venue name
+                        </label>
+
+                        <input
+                            class="form-control form-control-lg"
+                            name="name"
+                            placeholder="e.g. Main Auditorium"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Capacity
+                        </label>
+
+                        <div class="input-group">
+
+                            <input
+                                class="form-control"
+                                name="capacity"
+                                type="number"
+                                min="1"
+                                placeholder="300"
+                                required
+                            >
+
+                            <span class="input-group-text">
+                                seats
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Location
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+
+                            <input
+                                class="form-control"
+                                name="location"
+                                placeholder="e.g. Academic Block A"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Equipment
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            name="equipment"
+                            rows="4"
+                            placeholder="e.g. Projector, microphones, Wi-Fi..."
+                        ></textarea>
+
+                        <div class="form-text muted">
+                            List important equipment or facilities available at the venue.
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand w-100 py-3"
+                        id="addVenueBtn"
+                    >
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add Venue
+                    </button>
+
+                </form>
+
+
+                <div class="d-flex gap-2 align-items-start mt-4 pt-4"
+                     style="border-top:1px solid var(--border);">
+
+                    <i class="bi bi-info-circle mt-1"
+                       style="color:var(--brand);"></i>
+
+                    <div class="small muted">
+                        Keep capacity accurate because organizers use it when planning event registrations.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Venue directory -->
+        <div class="col-xl-8">
+
+            <div class="cardx overflow-hidden h-100">
+
+                <div class="p-4 p-lg-5"
+                     style="border-bottom:1px solid var(--border);">
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                        <div>
+                            <div class="small fw-bold muted mb-1">
+                                VENUE DIRECTORY
+                            </div>
+
+                            <h4 class="mb-1">
+                                Existing venues
+                            </h4>
+
+                            <p class="muted small mb-0">
+                                Browse the spaces currently available in EventX.
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 col-lg-5">
+
+                            <div class="input-group">
+
+                                <span class="input-group-text"
+                                      style="background:var(--surface2);border-color:var(--border);color:var(--muted);">
+                                    <i class="bi bi-search"></i>
+                                </span>
+
+                                <input
+                                    type="search"
+                                    id="venueSearch"
+                                    class="form-control"
+                                    placeholder="Search venues..."
+                                    autocomplete="off"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="p-3 p-lg-4">
+
+                    <div class="row g-3"
+                         id="venueGrid">
+
+                        {% for v in venues %}
+
+                        <div class="col-md-6 venue-item">
+
+                            <div class="rounded-4 p-4 h-100"
+                                 style="background:var(--surface2);border:1px solid var(--border);">
+
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width:46px;height:46px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                                        <i class="bi bi-building fs-5"></i>
+
+                                    </div>
+
+
+                                    <div class="flex-grow-1"
+                                         style="min-width:0;">
+
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+
+                                            <h5 class="mb-1 venue-name">
+                                                {{ v.name }}
+                                            </h5>
+
+                                            <span class="badge-soft flex-shrink-0">
+                                                {{ v.capacity }}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="small muted mb-3">
+                                            <i class="bi bi-person me-1"></i>
+                                            {{ v.capacity }} seats
+                                        </div>
+
+
+                                        {% if v.location %}
+
+                                        <div class="small muted mb-2 venue-location">
+                                            <i class="bi bi-geo-alt me-1"
+                                               style="color:var(--teal);"></i>
+                                            {{ v.location }}
+                                        </div>
+
+                                        {% endif %}
+
+
+                                        {% if v.equipment %}
+
+                                        <div class="small muted venue-equipment"
+                                             style="line-height:1.6;">
+
+                                            <i class="bi bi-tools me-1"
+                                               style="color:var(--brand);"></i>
+
+                                            {{ v.equipment }}
+
+                                        </div>
+
+                                        {% else %}
+
+                                        <div class="small muted">
+                                            <i class="bi bi-tools me-1"></i>
+                                            No equipment details provided.
+                                        </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="col-12">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:70px;height:70px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                                    <i class="bi bi-building-x fs-2"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No venues yet
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Add the first venue using the form on the left.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+
+                        <!-- Search empty state -->
+                        <div class="col-12 d-none"
+                             id="venueSearchEmpty">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:64px;height:64px;background:var(--surface2);color:var(--muted);">
+
+                                    <i class="bi bi-search fs-4"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No matching venues
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Try another venue name, location or equipment keyword.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer note -->
+    <div class="d-flex align-items-start gap-2 mt-3 px-1">
+
+        <i class="bi bi-geo-alt mt-1"
+           style="color:var(--coral);"></i>
+
+        <div class="small muted">
+            Venue capacity and facilities are shown to organizers during event creation.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("venueSearch");
+    const venueItems = Array.from(
+        document.querySelectorAll(".venue-item")
+    );
+
+    const emptyState =
+        document.getElementById("venueSearchEmpty");
+
+
+    if (searchInput) {
+
+        function filterVenues() {
+
+            const query =
+                searchInput.value.trim().toLowerCase();
+
+            let visible = 0;
+
+
+            venueItems.forEach(function (item) {
+
+                const name =
+                    item.querySelector(".venue-name")?.textContent
+                        .trim()
+                        .toLowerCase() || "";
+
+                const location =
+                    item.querySelector(".venue-location")?.textContent
+                        .trim()
+                        .toLowerCase() || "";
+
+                const equipment =
+                    item.querySelector(".venue-equipment")?.textContent
+                        .trim()
+                        .toLowerCase() || "";
+
+
+                const matches =
+                    !query ||
+                    name.includes(query) ||
+                    location.includes(query) ||
+                    equipment.includes(query);
+
+
+                item.style.display =
+                    matches ? "" : "none";
+
+
+                if (matches) {
+                    visible++;
+                }
+
+            });
+
+
+            if (venueItems.length > 0 && visible === 0) {
+                emptyState.classList.remove("d-none");
+            } else {
+                emptyState.classList.add("d-none");
+            }
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterVenues
+        );
+
+    }
+
+
+    // Prevent accidental double submission.
+    const form =
+        document.getElementById("addVenueForm");
+
+    const button =
+        document.getElementById("addVenueBtn");
+
+
+    if (form && button) {
+
+        form.addEventListener("submit", function () {
+
+            if (!form.checkValidity()) {
+                return;
+            }
+
+            button.disabled = true;
+
+            button.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2"
+                      aria-hidden="true"></span>
+                Adding Venue...
+            `;
+
+        });
+
+    }
+
+});
+</script>
+
+{% endblock %}

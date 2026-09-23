@@ -1,0 +1,1175 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Attendance{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="attendance-page-header">
+
+        <div>
+            <div class="muted small fw-bold">
+                ATTENDANCE OPERATIONS
+            </div>
+
+            <h1 class="page-title mb-2">
+                Scan a participant
+            </h1>
+
+            <p class="muted mb-0">
+                Scan the student's EventX QR pass to record attendance.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('organizer_registrations', event_id=event.id) }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-people me-1"></i>
+            Participants
+        </a>
+
+    </div>
+
+
+    <div class="row g-4 mt-1">
+
+        <!-- SCANNER -->
+        <div class="col-lg-7">
+
+            <div class="cardx attendance-scanner-card">
+
+                <div class="attendance-card-header">
+
+                    <div>
+                        <div class="muted small fw-bold">
+                            QR SCANNER
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Check in student
+                        </h4>
+                    </div>
+
+                    <div
+                        class="scanner-live-status"
+                        id="scannerStatus"
+                    >
+                        <span></span>
+                        CAMERA OFF
+                    </div>
+
+                </div>
+
+
+                <!-- SESSION -->
+                <div class="mb-4">
+
+                    <label
+                        for="sessionLabel"
+                        class="attendance-form-label"
+                    >
+                        Attendance session
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text attendance-input-icon">
+                            <i class="bi bi-layers"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="sessionLabel"
+                            class="form-control"
+                            value="Main Session"
+                            maxlength="100"
+                            placeholder="e.g. Session 1"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                    <div class="small muted mt-2">
+                        Enter the session name before scanning.
+                        Each student can be checked in once for each session.
+                    </div>
+
+                </div>
+
+
+                <!-- CAMERA -->
+                <div class="scanner-stage">
+
+                    <div class="scanner-frame">
+
+                        <div
+                            id="reader"
+                            class="scanner"
+                        ></div>
+
+                        <div class="scanner-corner top-left"></div>
+                        <div class="scanner-corner top-right"></div>
+                        <div class="scanner-corner bottom-left"></div>
+                        <div class="scanner-corner bottom-right"></div>
+
+                    </div>
+
+
+                    <div class="scanner-controls">
+
+                        <button
+                            type="button"
+                            class="btn btn-brand"
+                            id="startCameraButton"
+                        >
+                            <i class="bi bi-camera-video me-1"></i>
+                            Start Camera
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-ghost"
+                            id="stopCameraButton"
+                            disabled
+                        >
+                            <i class="bi bi-stop-circle me-1"></i>
+                            Stop Camera
+                        </button>
+
+                    </div>
+
+
+                    <div class="scanner-instruction">
+
+                        <div class="scanner-instruction-icon">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </div>
+
+                        <div>
+                            <strong>
+                                Place the student's QR code inside the frame
+                            </strong>
+
+                            <span>
+                                Keep the QR code steady and clearly visible to the camera.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DIVIDER -->
+                <div class="attendance-or-divider">
+                    <span>OR ENTER MANUALLY</span>
+                </div>
+
+
+                <!-- MANUAL -->
+                <div class="manual-checkin">
+
+                    <label
+                        for="manualCode"
+                        class="attendance-form-label"
+                    >
+                        Registration ID
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text attendance-input-icon">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </span>
+
+                        <input
+                            id="manualCode"
+                            class="form-control"
+                            placeholder="EVT-XXXXXXXXXX"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            class="btn btn-brand attendance-checkin-button"
+                            id="manualCheckinButton"
+                        >
+                            <i class="bi bi-person-check me-1"></i>
+                            Check In
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RESULT -->
+                <div
+                    id="result"
+                    class="attendance-result d-none"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EVENT STATUS -->
+        <div class="col-lg-5">
+
+            <div class="cardx attendance-side-card">
+
+                <div class="muted small fw-bold">
+                    CURRENT EVENT
+                </div>
+
+                <h4 class="mt-2 mb-1">
+                    {{ event.title }}
+                </h4>
+
+                <div class="muted small">
+
+                    <i class="bi bi-calendar3 me-1"></i>
+
+                    {{ event.start_datetime.strftime('%d %b %Y') }}
+
+                    <span class="mx-1">·</span>
+
+                    <i class="bi bi-geo-alt me-1"></i>
+
+                    {{ event.venue.name }}
+
+                </div>
+
+
+                <div class="attendance-event-stats">
+
+                    <div>
+
+                        <div class="attendance-side-stat-icon purple">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <strong id="registeredCount">
+                            {{ event.active_registrations }}
+                        </strong>
+
+                        <span>
+                            Registered
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="attendance-side-stat-icon teal">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+
+                        <strong id="attendanceCount">
+                            {{ event.attendance_count }}
+                        </strong>
+
+                        <span>
+                            Checked in
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="attendance-side-stat-icon amber">
+                            <i class="bi bi-clock"></i>
+                        </div>
+
+                        <strong id="remainingCount">
+                            {{ event.active_registrations - event.attendance_count }}
+                        </strong>
+
+                        <span>
+                            Remaining
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="attendance-progress-section">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <span class="muted small">
+                            Attendance rate
+                        </span>
+
+                        <strong
+                            id="attendanceRate"
+                            class="small"
+                        >
+                            {{ ((event.attendance_count / event.active_registrations) * 100)|round(1) if event.active_registrations else 0 }}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress mt-2 attendance-progress">
+
+                        <div
+                            id="attendanceProgressBar"
+                            class="progress-bar"
+                            style="width:{{ ((event.attendance_count / event.active_registrations) * 100) if event.active_registrations else 0 }}%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <hr>
+
+
+                <a
+                    href="{{ url_for('organizer_registrations', event_id=event.id) }}"
+                    class="btn btn-ghost w-100"
+                >
+                    <i class="bi bi-list-ul me-1"></i>
+                    View participant list
+                </a>
+
+            </div>
+
+
+            <!-- HOW IT WORKS -->
+            <div class="cardx attendance-how-card mt-4">
+
+                <div class="muted small fw-bold">
+                    HOW IT WORKS
+                </div>
+
+
+                <div class="attendance-steps">
+
+                    <div class="attendance-step">
+
+                        <div class="attendance-step-number">
+                            1
+                        </div>
+
+                        <div>
+                            <strong>
+                                Select a session
+                            </strong>
+
+                            <span>
+                                Enter the session name before checking students in.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="attendance-step">
+
+                        <div class="attendance-step-number">
+                            2
+                        </div>
+
+                        <div>
+                            <strong>
+                                Start the camera
+                            </strong>
+
+                            <span>
+                                Allow camera access when your browser asks.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="attendance-step">
+
+                        <div class="attendance-step-number">
+                            3
+                        </div>
+
+                        <div>
+                            <strong>
+                                Scan the student's QR pass
+                            </strong>
+
+                            <span>
+                                Hold the code inside the camera frame.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="attendance-step">
+
+                        <div class="attendance-step-number">
+                            4
+                        </div>
+
+                        <div>
+                            <strong>
+                                Attendance is recorded
+                            </strong>
+
+                            <span>
+                                The same student can attend another session without creating a duplicate for the same session.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+
+let qrScanner = null;
+let cameraRunning = false;
+let cameraStarting = false;
+let scannerBusy = false;
+
+let lastScannedCode = "";
+let lastScannedAt = 0;
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+const readerElement =
+    document.getElementById("reader");
+
+const startCameraButton =
+    document.getElementById("startCameraButton");
+
+const stopCameraButton =
+    document.getElementById("stopCameraButton");
+
+const scannerStatus =
+    document.getElementById("scannerStatus");
+
+const manualInput =
+    document.getElementById("manualCode");
+
+const sessionLabelInput =
+    document.getElementById("sessionLabel");
+
+const manualCheckinButton =
+    document.getElementById("manualCheckinButton");
+
+const resultElement =
+    document.getElementById("result");
+
+
+/* =========================================================
+   SESSION
+   ========================================================= */
+
+function getSessionLabel() {
+
+    const value =
+        sessionLabelInput?.value.trim();
+
+    return value || "Main Session";
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setScannerStatus(text, active = false) {
+
+    if (!scannerStatus) {
+        return;
+    }
+
+    scannerStatus.innerHTML = `
+        <span></span>
+        ${text}
+    `;
+
+    scannerStatus.classList.toggle(
+        "scanner-active",
+        active
+    );
+
+}
+
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+function showAttendanceResult(ok, message) {
+
+    if (!resultElement) {
+        return;
+    }
+
+    resultElement.className =
+        `attendance-result ${ok ? "success" : "error"}`;
+
+    resultElement.classList.remove("d-none");
+
+    resultElement.innerHTML = `
+        <div class="attendance-result-icon">
+            <i class="bi ${
+                ok
+                    ? "bi-check-lg"
+                    : "bi-exclamation-lg"
+            }"></i>
+        </div>
+
+        <div>
+            <strong>
+                ${
+                    ok
+                        ? "Attendance update"
+                        : "Check-in failed"
+                }
+            </strong>
+
+            <span>
+                ${message}
+            </span>
+        </div>
+    `;
+
+}
+
+
+/* =========================================================
+   UPDATE COUNTERS
+   ========================================================= */
+
+function updateAttendanceCounters() {
+
+    const registeredElement =
+        document.getElementById("registeredCount");
+
+    const attendanceElement =
+        document.getElementById("attendanceCount");
+
+    const remainingElement =
+        document.getElementById("remainingCount");
+
+    const rateElement =
+        document.getElementById("attendanceRate");
+
+    const progressElement =
+        document.getElementById("attendanceProgressBar");
+
+
+    if (
+        !registeredElement ||
+        !attendanceElement ||
+        !remainingElement
+    ) {
+        return;
+    }
+
+
+    const registered =
+        Number(
+            registeredElement.textContent.trim()
+        );
+
+    const currentAttendance =
+        Number(
+            attendanceElement.textContent.trim()
+        );
+
+    const newAttendance =
+        currentAttendance + 1;
+
+
+    const remaining =
+        Math.max(
+            0,
+            registered - newAttendance
+        );
+
+
+    const rate =
+        registered > 0
+            ? (newAttendance / registered) * 100
+            : 0;
+
+
+    attendanceElement.textContent =
+        newAttendance;
+
+    remainingElement.textContent =
+        remaining;
+
+
+    if (rateElement) {
+
+        rateElement.textContent =
+            `${Math.min(rate, 100).toFixed(1)}%`;
+
+    }
+
+
+    if (progressElement) {
+
+        progressElement.style.width =
+            `${Math.min(rate, 100)}%`;
+
+    }
+
+}
+
+
+/* =========================================================
+   CHECK-IN API
+   ========================================================= */
+
+async function checkIn(code) {
+
+    const cleanCode =
+        String(code || "").trim();
+
+
+    if (!cleanCode) {
+
+        showAttendanceResult(
+            false,
+            "Enter a registration ID first."
+        );
+
+        return;
+    }
+
+
+    if (scannerBusy) {
+        return;
+    }
+
+
+    const sessionName =
+        getSessionLabel();
+
+
+    scannerBusy = true;
+
+
+    console.log(
+        "EVENTX CHECK-IN:",
+        {
+            registration_number: cleanCode,
+            session_label: sessionName
+        }
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/attendance/check-in",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        registration_number: cleanCode,
+                        session_label: sessionName
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "EVENTX ATTENDANCE RESPONSE:",
+            data
+        );
+
+
+        /* -------------------------------------------------
+           NEW ATTENDANCE
+           ------------------------------------------------- */
+
+        if (data.ok && !data.already) {
+
+            const returnedSession =
+                data.session_label ||
+                sessionName;
+
+
+            showAttendanceResult(
+                true,
+                data.message ||
+                `Attendance marked for ${
+                    data.student || "Student"
+                } — ${returnedSession}`
+            );
+
+
+            updateAttendanceCounters();
+
+
+            if (manualInput) {
+                manualInput.value = "";
+            }
+
+
+            await stopCamera();
+
+        }
+
+
+        /* -------------------------------------------------
+           DUPLICATE ATTENDANCE
+           ------------------------------------------------- */
+
+        else if (data.ok && data.already) {
+
+            const returnedSession =
+                data.session_label ||
+                sessionName;
+
+
+            showAttendanceResult(
+                true,
+                data.message ||
+                `Already checked in for ${
+                    returnedSession
+                }: ${
+                    data.student || "Student"
+                }`
+            );
+
+
+            if (manualInput) {
+                manualInput.value = "";
+            }
+
+
+            await stopCamera();
+
+        }
+
+
+        /* -------------------------------------------------
+           FAILED
+           ------------------------------------------------- */
+
+        else {
+
+            showAttendanceResult(
+                false,
+                data.message ||
+                "Attendance could not be recorded."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "EVENTX ATTENDANCE ERROR:",
+            error
+        );
+
+
+        showAttendanceResult(
+            false,
+            "Could not connect to the attendance service."
+        );
+
+    } finally {
+
+        scannerBusy = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   START CAMERA
+   ========================================================= */
+
+async function startCamera() {
+
+    if (
+        !readerElement ||
+        cameraRunning ||
+        cameraStarting
+    ) {
+        return;
+    }
+
+
+    cameraStarting = true;
+
+
+    setScannerStatus(
+        "FINDING CAMERA...",
+        false
+    );
+
+
+    try {
+
+        const cameras =
+            await Html5Qrcode.getCameras();
+
+
+        console.log(
+            "EVENTX CAMERAS:",
+            cameras
+        );
+
+
+        if (!cameras || cameras.length === 0) {
+
+            setScannerStatus(
+                "NO CAMERA FOUND",
+                false
+            );
+
+
+            showAttendanceResult(
+                false,
+                "No camera was found on this device."
+            );
+
+
+            return;
+        }
+
+
+        let selectedCamera =
+            cameras[0];
+
+
+        const rearCamera =
+            cameras.find(
+                camera =>
+                    /back|rear|environment/i.test(
+                        camera.label || ""
+                    )
+            );
+
+
+        if (rearCamera) {
+            selectedCamera = rearCamera;
+        }
+
+
+        console.log(
+            "EVENTX SELECTED CAMERA:",
+            selectedCamera
+        );
+
+
+        qrScanner =
+            new Html5Qrcode(
+                "reader"
+            );
+
+
+        await qrScanner.start(
+
+            selectedCamera.id,
+
+            {
+                fps: 15,
+
+                qrbox: {
+                    width: 280,
+                    height: 280
+                },
+
+                aspectRatio: 1.0,
+
+                disableFlip: false,
+
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.QR_CODE
+                ],
+
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            },
+
+
+            async decodedText => {
+
+                const code =
+                    String(
+                        decodedText || ""
+                    ).trim();
+
+
+                if (!code) {
+                    return;
+                }
+
+
+                const now =
+                    Date.now();
+
+
+                if (
+                    code === lastScannedCode &&
+                    now - lastScannedAt < 4000
+                ) {
+                    return;
+                }
+
+
+                lastScannedCode =
+                    code;
+
+                lastScannedAt =
+                    now;
+
+
+                console.log(
+                    "EVENTX QR DETECTED:",
+                    code
+                );
+
+
+                await checkIn(code);
+
+            },
+
+
+            () => {
+
+                // Normal camera frames without a QR
+                // are ignored.
+
+            }
+
+        );
+
+
+        cameraRunning = true;
+
+
+        setScannerStatus(
+            "SCANNING",
+            true
+        );
+
+
+        if (startCameraButton) {
+            startCameraButton.disabled = true;
+        }
+
+
+        if (stopCameraButton) {
+            stopCameraButton.disabled = false;
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "EVENTX CAMERA ERROR:",
+            error
+        );
+
+
+        setScannerStatus(
+            "CAMERA ERROR",
+            false
+        );
+
+
+        showAttendanceResult(
+            false,
+            "Could not start the camera."
+        );
+
+
+    } finally {
+
+        cameraStarting = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   STOP CAMERA
+   ========================================================= */
+
+async function stopCamera() {
+
+    if (!qrScanner) {
+        return;
+    }
+
+
+    try {
+
+        if (cameraRunning) {
+            await qrScanner.stop();
+        }
+
+
+        await qrScanner.clear();
+
+    } catch (error) {
+
+        console.error(
+            "EVENTX STOP CAMERA ERROR:",
+            error
+        );
+
+    }
+
+
+    qrScanner = null;
+    cameraRunning = false;
+
+
+    setScannerStatus(
+        "CAMERA OFF",
+        false
+    );
+
+
+    if (startCameraButton) {
+        startCameraButton.disabled = false;
+    }
+
+
+    if (stopCameraButton) {
+        stopCameraButton.disabled = true;
+    }
+
+}
+
+
+/* =========================================================
+   MANUAL CHECK-IN
+   ========================================================= */
+
+async function manualCheckin() {
+
+    const code =
+        manualInput?.value.trim();
+
+
+    if (!code) {
+
+        showAttendanceResult(
+            false,
+            "Enter a registration ID first."
+        );
+
+
+        manualInput?.focus();
+
+        return;
+    }
+
+
+    await checkIn(code);
+
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+if (startCameraButton) {
+
+    startCameraButton.addEventListener(
+        "click",
+        startCamera
+    );
+
+}
+
+
+if (stopCameraButton) {
+
+    stopCameraButton.addEventListener(
+        "click",
+        stopCamera
+    );
+
+}
+
+
+if (manualCheckinButton) {
+
+    manualCheckinButton.addEventListener(
+        "click",
+        manualCheckin
+    );
+
+}
+
+
+/* =========================================================
+   ENTER KEY
+   ========================================================= */
+
+if (manualInput) {
+
+    manualInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                manualCheckin();
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
+{% endblock %}

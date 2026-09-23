@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+
+{% block title %}Users{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(20,184,166,.10);color:var(--teal);">
+                    USER DIRECTORY
+                </span>
+
+                <span class="small muted">
+                    Administration
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                Users
+            </h1>
+
+            <p class="muted mb-0">
+                View the people registered on the EventX platform.
+            </p>
+        </div>
+
+        <div class="cardx px-4 py-3">
+
+            <div class="small muted">
+                Total users
+            </div>
+
+            <div class="fs-3 fw-bold mt-1">
+                {{ users|length }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Search + filter -->
+    <div class="cardx p-3 p-lg-4 mb-4">
+
+        <div class="row g-3 align-items-center">
+
+            <div class="col-lg-8">
+
+                <div class="input-group">
+
+                    <span class="input-group-text"
+                          style="background:var(--surface2);border-color:var(--border);color:var(--muted);">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input
+                        type="search"
+                        id="userSearch"
+                        class="form-control"
+                        placeholder="Search by name, email, role or department..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <select id="roleFilter"
+                        class="form-select">
+
+                    <option value="">All roles</option>
+                    <option value="student">Student</option>
+                    <option value="organizer">Organizer</option>
+                    <option value="admin">Admin</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Users table -->
+    <div class="cardx overflow-hidden">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 p-4"
+             style="border-bottom:1px solid var(--border);">
+
+            <div>
+                <h5 class="mb-1">
+                    Registered users
+                </h5>
+
+                <p class="muted small mb-0">
+                    User accounts currently stored in EventX.
+                </p>
+            </div>
+
+            <div class="small muted">
+                Showing
+                <span id="visibleCount">{{ users|length }}</span>
+                users
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0"
+                   id="usersTable">
+
+                <thead>
+
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Joined</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for u in users %}
+
+                    <tr class="user-row">
+
+                        <!-- User -->
+                        <td class="ps-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:42px;height:42px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                                    <span class="fw-bold">
+                                        {{ u.name[:1]|upper }}
+                                    </span>
+
+                                </div>
+
+                                <div style="min-width:160px;">
+
+                                    <div class="fw-bold user-name">
+                                        {{ u.name }}
+                                    </div>
+
+                                    {% if u.roll_number %}
+
+                                    <div class="small muted mt-1">
+                                        Roll No. {{ u.roll_number }}
+                                    </div>
+
+                                    {% else %}
+
+                                    <div class="small muted mt-1">
+                                        EventX account
+                                    </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Email -->
+                        <td>
+
+                            <span class="user-email">
+                                {{ u.email }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Role -->
+                        <td>
+
+                            <span class="role-value d-none">
+                                {{ u.role }}
+                            </span>
+
+                            {% if u.role == "admin" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(91,75,219,.12);color:var(--brand);">
+                                    <i class="bi bi-shield-lock me-1"></i>
+                                    Admin
+                                </span>
+
+                            {% elif u.role == "organizer" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(245,158,11,.12);color:var(--amber);">
+                                    <i class="bi bi-megaphone me-1"></i>
+                                    Organizer
+                                </span>
+
+                            {% elif u.role == "student" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(20,184,166,.10);color:var(--teal);">
+                                    <i class="bi bi-person me-1"></i>
+                                    Student
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge-soft">
+                                    {{ u.role|title }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Department -->
+                        <td>
+
+                            <span class="user-department">
+                                {{ u.department or "—" }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Joined -->
+                        <td class="pe-4">
+
+                            <div class="fw-semibold">
+                                {{ u.created_at.strftime('%d %b %Y') }}
+                            </div>
+
+                            <div class="small muted mt-1">
+                                {{ u.created_at.strftime('%I:%M %p') }}
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:70px;height:70px;background:rgba(20,184,166,.10);color:var(--teal);">
+
+                                    <i class="bi bi-people fs-2"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No users found
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    There are currently no user accounts in EventX.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+
+                    <!-- Search empty state -->
+                    <tr id="searchEmpty" class="d-none">
+
+                        <td colspan="5">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:64px;height:64px;background:var(--surface2);color:var(--muted);">
+
+                                    <i class="bi bi-search fs-4"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No matching users
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Try another name, email, role or department.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Information note -->
+    <div class="d-flex align-items-start gap-2 mt-3 px-1">
+
+        <i class="bi bi-info-circle mt-1"
+           style="color:var(--brand);"></i>
+
+        <div class="small muted">
+            This page provides an administrative view of user accounts.
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* =========================================================
+   ADMIN USERS TABLE THEME
+   ========================================================= */
+
+#usersTable {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    --bs-table-hover-bg: var(--surface2);
+    --bs-table-hover-color: var(--text);
+
+    color:var(--text) !important;
+    background-color:var(--surface) !important;
+}
+
+#usersTable > :not(caption) > * > * {
+    color:var(--text) !important;
+    background-color:var(--surface) !important;
+    border-color:var(--border) !important;
+}
+
+#usersTable thead,
+#usersTable thead tr,
+#usersTable thead th {
+    color:var(--muted) !important;
+    background-color:var(--surface2) !important;
+    border-color:var(--border) !important;
+}
+
+#usersTable tbody,
+#usersTable tbody tr,
+#usersTable tbody td {
+    color:var(--text) !important;
+    background-color:var(--surface) !important;
+    border-color:var(--border) !important;
+}
+
+#usersTable tbody tr:hover td {
+    color:var(--text) !important;
+    background-color:var(--surface2) !important;
+}
+
+</style>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("userSearch");
+    const roleFilter = document.getElementById("roleFilter");
+
+    const rows = Array.from(
+        document.querySelectorAll(".user-row")
+    );
+
+    const visibleCount =
+        document.getElementById("visibleCount");
+
+    const searchEmpty =
+        document.getElementById("searchEmpty");
+
+
+    function filterUsers() {
+
+        const query =
+            searchInput.value.trim().toLowerCase();
+
+        const selectedRole =
+            roleFilter.value.trim().toLowerCase();
+
+        let visible = 0;
+
+
+        rows.forEach(function (row) {
+
+            const name =
+                row.querySelector(".user-name")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+            const email =
+                row.querySelector(".user-email")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+            const role =
+                row.querySelector(".role-value")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+            const department =
+                row.querySelector(".user-department")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+
+            const matchesSearch =
+                !query ||
+                name.includes(query) ||
+                email.includes(query) ||
+                role.includes(query) ||
+                department.includes(query);
+
+
+            const matchesRole =
+                !selectedRole ||
+                role === selectedRole;
+
+
+            const matches =
+                matchesSearch && matchesRole;
+
+
+            row.style.display =
+                matches ? "" : "none";
+
+
+            if (matches) {
+                visible++;
+            }
+
+        });
+
+
+        visibleCount.textContent = visible;
+
+
+        if (rows.length > 0 && visible === 0) {
+            searchEmpty.classList.remove("d-none");
+        } else {
+            searchEmpty.classList.add("d-none");
+        }
+
+    }
+
+
+    searchInput.addEventListener(
+        "input",
+        filterUsers
+    );
+
+
+    roleFilter.addEventListener(
+        "change",
+        filterUsers
+    );
+
+});
+
+</script>
+
+{% endblock %}

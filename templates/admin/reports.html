@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Reports{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="small fw-bold muted mb-2">
+                ADMIN REPORTING
+            </div>
+
+            <h1 class="page-title mb-2">
+                Event reports.
+            </h1>
+
+            <p class="muted mb-0">
+                Review participation, attendance, certificates and feedback from one place.
+            </p>
+
+        </div>
+
+        {% if selected_event %}
+
+        <a
+            href="{{ url_for('admin_report_pdf', event_id=selected_event.id) }}"
+            class="btn btn-brand px-4"
+        >
+            <i class="bi bi-file-earmark-pdf me-2"></i>
+            Download PDF
+        </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Event selector -->
+    <div class="cardx p-4 mb-4">
+
+        <div class="row align-items-end g-3">
+
+            <div class="col-lg-9">
+
+                <label class="form-label fw-semibold">
+                    Select Event
+                </label>
+
+                <select
+                    id="eventReportSelect"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        Choose an event
+                    </option>
+
+                    {% for event in events %}
+
+                    <option
+                        value="{{ event.id }}"
+                        {% if selected_event and selected_event.id == event.id %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ event.title }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <button
+                    type="button"
+                    class="btn btn-brand w-100"
+                    onclick="openReport()"
+                >
+                    <i class="bi bi-bar-chart-line me-2"></i>
+                    View Report
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if not selected_event %}
+
+    <div class="cardx p-5 text-center">
+
+        <div
+            class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+            style="width:64px;height:64px;background:rgba(91,75,219,.10);color:var(--brand);"
+        >
+            <i class="bi bi-file-earmark-bar-graph fs-3"></i>
+        </div>
+
+        <h4 class="mb-2">
+            Select an event to generate a report
+        </h4>
+
+        <p class="muted mb-0">
+            Event registration, attendance, certificates, feedback and participation data will appear here.
+        </p>
+
+    </div>
+
+    {% else %}
+
+
+    <!-- Event heading -->
+    <div class="cardx p-4 p-lg-5 mb-4">
+
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+
+            <div>
+
+                <div class="small fw-bold muted mb-1">
+                    SELECTED EVENT
+                </div>
+
+                <h3 class="mb-2">
+                    {{ selected_event.title }}
+                </h3>
+
+                <div class="muted">
+                    {{ selected_event.start_datetime.strftime('%d %b %Y, %I:%M %p') }}
+                    ·
+                    {{ selected_event.venue.name if selected_event.venue else 'Venue not specified' }}
+                </div>
+
+            </div>
+
+            <div>
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(91,75,219,.10);color:var(--brand);">
+
+                    {{ selected_event.status|title }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Metrics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Registered
+                </div>
+
+                <div class="display-6 fw-bold">
+                    {{ report.registered_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Attendance
+                </div>
+
+                <div class="display-6 fw-bold"
+                     style="color:var(--teal);">
+                    {{ report.attendance_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Certificates
+                </div>
+
+                <div class="display-6 fw-bold"
+                     style="color:var(--brand);">
+                    {{ report.certificate_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Avg. Rating
+                </div>
+
+                <div class="display-6 fw-bold"
+                     style="color:var(--amber);">
+                    {{ report.average_rating }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Registration summary -->
+        <div class="col-lg-5">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small fw-bold muted mb-2">
+                    REGISTRATION SUMMARY
+                </div>
+
+                <h4 class="mb-4">
+                    Participant status
+                </h4>
+
+                <div class="d-flex justify-content-between py-3 border-bottom"
+                     style="border-color:var(--border)!important;">
+
+                    <span>
+                        Registered
+                    </span>
+
+                    <strong>
+                        {{ report.registered_count }}
+                    </strong>
+
+                </div>
+
+                <div class="d-flex justify-content-between py-3 border-bottom"
+                     style="border-color:var(--border)!important;">
+
+                    <span>
+                        Cancelled
+                    </span>
+
+                    <strong>
+                        {{ report.cancelled_count }}
+                    </strong>
+
+                </div>
+
+                <div class="d-flex justify-content-between py-3">
+
+                    <span>
+                        Waitlisted
+                    </span>
+
+                    <strong>
+                        {{ report.waitlisted_count }}
+                    </strong>
+
+                </div>
+
+                <div class="mt-4 p-3 rounded-4"
+                     style="background:var(--surface2);">
+
+                    <div class="small muted mb-1">
+                        Attendance rate
+                    </div>
+
+                    <div class="fw-bold fs-4">
+
+                        {% if report.registered_count > 0 %}
+
+                            {{ ((report.attendance_count / report.registered_count) * 100)|round(1) }}%
+
+                        {% else %}
+
+                            0%
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Department participation -->
+        <div class="col-lg-7">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small fw-bold muted mb-2">
+                    PARTICIPATION
+                </div>
+
+                <h4 class="mb-4">
+                    By department
+                </h4>
+
+                {% if report.department_counts %}
+
+                    {% for department, count in report.department_counts.items() %}
+
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between mb-1">
+
+                            <span class="fw-semibold">
+                                {{ department }}
+                            </span>
+
+                            <span class="muted">
+                                {{ count }}
+                            </span>
+
+                        </div>
+
+                        <div class="progress"
+                             style="height:8px;background:var(--surface2);">
+
+                            <div
+                                class="progress-bar"
+                                style="width:{{ (count / report.registered_count * 100) if report.registered_count else 0 }}%;background:var(--brand);"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="muted">
+                        No participation data available.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Feedback -->
+    <div class="cardx p-4 p-lg-5 mt-4">
+
+        <div class="small fw-bold muted mb-2">
+            FEEDBACK
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+
+            <div>
+
+                <h4 class="mb-1">
+                    Participant feedback
+                </h4>
+
+                <div class="muted">
+                    {{ report.feedback_count }} response{{ 's' if report.feedback_count != 1 else '' }}
+                </div>
+
+            </div>
+
+            <div class="fs-3 fw-bold"
+                 style="color:var(--amber);">
+
+                {{ report.average_rating }}/5
+
+            </div>
+
+        </div>
+
+
+        {% if report.feedback_items %}
+
+            <div class="row g-3">
+
+                {% for feedback in report.feedback_items %}
+
+                <div class="col-lg-6">
+
+                    <div
+                        class="rounded-4 p-4 h-100"
+                        style="background:var(--surface2);border:1px solid var(--border);"
+                    >
+
+                        <div class="d-flex justify-content-between gap-3 mb-2">
+
+                            <div class="fw-semibold">
+                                {{ feedback.student.name if feedback.student else 'Student' }}
+                            </div>
+
+                            <div style="color:var(--amber);">
+                                {{ feedback.rating }}/5
+                            </div>
+
+                        </div>
+
+                        <div class="small muted">
+                            {{ feedback.comment or 'No comment provided.' }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="muted">
+                No feedback responses have been submitted.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Participants -->
+    <div class="cardx p-4 p-lg-5 mt-4">
+
+        <div class="small fw-bold muted mb-2">
+            PARTICIPANTS
+        </div>
+
+        <h4 class="mb-4">
+            Registration list
+        </h4>
+
+        {% if report.registrations %}
+
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Roll Number
+                        </th>
+
+                        <th>
+                            Department
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for reg in report.registrations %}
+
+                    <tr>
+
+                        <td>
+                            {{ loop.index }}
+                        </td>
+
+                        <td class="fw-semibold">
+                            {{ reg.student.name if reg.student else 'Unknown' }}
+                        </td>
+
+                        <td>
+                            {{ reg.student.roll_number if reg.student and reg.student.roll_number else '-' }}
+                        </td>
+
+                        <td>
+                            {{ reg.student.department if reg.student and reg.student.department else '-' }}
+                        </td>
+
+                        <td>
+                            {{ reg.status|title }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="muted">
+            No registrations found for this event.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function openReport() {
+
+    const select =
+        document.getElementById(
+            "eventReportSelect"
+        );
+
+    const eventId =
+        select.value;
+
+    if (!eventId) {
+        return;
+    }
+
+    window.location.href =
+        "{{ url_for('admin_reports') }}"
+        + "?event_id="
+        + encodeURIComponent(eventId);
+}
+
+</script>
+
+{% endblock %}

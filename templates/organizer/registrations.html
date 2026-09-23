@@ -1,0 +1,735 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Participants
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-head">
+
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    PARTICIPANTS
+                </div>
+
+                <h1 class="page-title mb-2">
+                    {{ event.title }}
+                </h1>
+
+                <p class="muted mb-0">
+                    Manage registrations and monitor attendance for this event.
+                </p>
+
+            </div>
+
+
+            <a
+                href="javascript:history.back()"
+                class="btn btn-ghost"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Command Center
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         COUNTS
+    ====================================================== -->
+
+    {% set ns = namespace(
+        checked_in=0,
+        pending=0,
+        waitlisted=0
+    ) %}
+
+
+    {% for r in regs %}
+
+        {% if r.attendance %}
+            {% set ns.checked_in = ns.checked_in + 1 %}
+        {% endif %}
+
+        {% if not r.attendance and r.status == 'registered' %}
+            {% set ns.pending = ns.pending + 1 %}
+        {% endif %}
+
+        {% if r.status == 'waitlisted' %}
+            {% set ns.waitlisted = ns.waitlisted + 1 %}
+        {% endif %}
+
+    {% endfor %}
+
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- TOTAL -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="participant-metric">
+
+                <div class="participant-metric-icon purple">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div class="participant-metric-value">
+                    {{ event.active_registrations }}
+                </div>
+
+                <div class="participant-metric-label">
+                    Registered
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHECKED IN -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="participant-metric">
+
+                <div class="participant-metric-icon teal">
+                    <i class="bi bi-person-check"></i>
+                </div>
+
+                <div class="participant-metric-value">
+                    {{ ns.checked_in }}
+                </div>
+
+                <div class="participant-metric-label">
+                    Checked in
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PENDING -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="participant-metric">
+
+                <div class="participant-metric-icon amber">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div class="participant-metric-value">
+                    {{ ns.pending }}
+                </div>
+
+                <div class="participant-metric-label">
+                    Awaiting check-in
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- WAITLIST -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="participant-metric">
+
+                <div class="participant-metric-icon coral">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div class="participant-metric-value">
+                    {{ ns.waitlisted }}
+                </div>
+
+                <div class="participant-metric-label">
+                    Waitlisted
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PARTICIPANT TABLE
+    ====================================================== -->
+
+    <div class="cardx participant-panel">
+
+
+        <!-- TOOLBAR -->
+
+        <div class="participant-toolbar">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    REGISTRATION LIST
+                </div>
+
+                <h4 class="mb-0 mt-1">
+                    Participants
+                </h4>
+
+            </div>
+
+
+            <div class="participant-search">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="search"
+                    id="participantSearch"
+                    placeholder="Search name, roll number or registration..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- FILTERS -->
+
+        <div class="participant-filter-row">
+
+            <button
+                type="button"
+                class="participant-filter active"
+                data-participant-filter="all"
+            >
+                All
+                <span>{{ regs|length }}</span>
+            </button>
+
+
+            <button
+                type="button"
+                class="participant-filter"
+                data-participant-filter="registered"
+            >
+                Registered
+            </button>
+
+
+            <button
+                type="button"
+                class="participant-filter"
+                data-participant-filter="checked-in"
+            >
+                Checked In
+            </button>
+
+
+            <button
+                type="button"
+                class="participant-filter"
+                data-participant-filter="waitlisted"
+            >
+                Waitlisted
+            </button>
+
+
+            <div
+                id="participantResultCount"
+                class="participant-result-count"
+            >
+                {{ regs|length }} participants
+            </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-responsive participant-table-wrap">
+
+            <table class="table participant-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Participant
+                        </th>
+
+                        <th>
+                            Department
+                        </th>
+
+                        <th>
+                            Registration
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Attendance
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="participantTableBody">
+
+
+                    {% for r in regs %}
+
+                    {% set participant_status = 'registered' %}
+
+                    {% if r.status == 'waitlisted' %}
+                        {% set participant_status = 'waitlisted' %}
+                    {% elif r.attendance %}
+                        {% set participant_status = 'checked-in' %}
+                    {% endif %}
+
+
+                    <tr
+                        class="participant-row"
+                        data-status="{{ participant_status }}"
+                        data-search="{{ (
+                            (r.student.name or '') ~ ' ' ~
+                            (r.student.roll_number or '') ~ ' ' ~
+                            (r.student.department or '') ~ ' ' ~
+                            (r.registration_number or '')
+                        )|lower }}"
+                    >
+
+
+                        <!-- PARTICIPANT -->
+
+                        <td>
+
+                            <div class="participant-person">
+
+                                <div class="participant-avatar">
+                                    {{ r.student.name[:1]|upper }}
+                                </div>
+
+                                <div class="participant-person-info">
+
+                                    <div class="participant-name">
+                                        {{ r.student.name }}
+                                    </div>
+
+                                    <div class="participant-email">
+                                        {{ r.student.email }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- DEPARTMENT -->
+
+                        <td>
+
+                            <span class="participant-department">
+                                {{ r.student.department }}
+                            </span>
+
+                            <div class="participant-roll">
+                                {{ r.student.roll_number or 'No roll number' }}
+                            </div>
+
+                        </td>
+
+
+                        <!-- REGISTRATION -->
+
+                        <td>
+
+                            <div class="participant-registration">
+
+                                <span>
+                                    {{ r.registration_number }}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="participant-copy"
+                                    data-copy="{{ r.registration_number }}"
+                                    title="Copy registration number"
+                                    aria-label="Copy registration number"
+                                >
+                                    <i class="bi bi-copy"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- STATUS -->
+
+                        <td>
+
+                            {% if r.status == 'waitlisted' %}
+
+                                <span class="participant-status waitlisted">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Waitlisted
+                                </span>
+
+                            {% elif r.status == 'registered' %}
+
+                                {% if r.attendance %}
+
+                                    <span class="participant-status checked-in">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        Checked In
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="participant-status registered">
+                                        <i class="bi bi-person-check"></i>
+                                        Registered
+                                    </span>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="participant-status cancelled">
+                                    <i class="bi bi-x-circle"></i>
+                                    {{ r.status|title }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- ATTENDANCE -->
+
+                        <td>
+
+                            {% if r.attendance %}
+
+                                <div class="participant-attendance">
+
+                                    <div class="participant-attendance-icon">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            Present
+                                        </strong>
+
+                                        <span>
+                                            {{ r.attendance.check_in_time.strftime('%I:%M %p') }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            {% else %}
+
+                                <div class="participant-not-attended">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    <span>
+                                        Not checked in
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+
+                    {% else %}
+
+
+                    <!-- EMPTY DATABASE STATE -->
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="participant-empty-cell"
+                        >
+
+                            <div class="participant-empty">
+
+                                <div class="participant-empty-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+
+                                <h5 class="mt-3 mb-2">
+                                    No participants yet
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Registered students will appear here.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- SEARCH EMPTY -->
+
+        <div
+            id="participantSearchEmpty"
+            class="participant-search-empty d-none"
+        >
+
+            <div class="participant-empty-icon">
+                <i class="bi bi-search"></i>
+            </div>
+
+            <h5 class="mt-3 mb-2">
+                No matching participants
+            </h5>
+
+            <p class="muted mb-0">
+                Try a different name, roll number or registration ID.
+            </p>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const rows =
+        Array.from(
+            document.querySelectorAll(".participant-row")
+        );
+
+    const filters =
+        document.querySelectorAll(".participant-filter");
+
+    const search =
+        document.getElementById("participantSearch");
+
+    const resultCount =
+        document.getElementById("participantResultCount");
+
+    const empty =
+        document.getElementById("participantSearchEmpty");
+
+
+    let selectedFilter = "all";
+
+
+    function updateParticipants() {
+
+        const query =
+            (search?.value || "").trim().toLowerCase();
+
+        let visibleCount = 0;
+
+
+        rows.forEach((row) => {
+
+            const status =
+                row.dataset.status || "";
+
+            const searchableText =
+                row.dataset.search || "";
+
+
+            const filterMatches =
+                selectedFilter === "all" ||
+                status === selectedFilter;
+
+
+            const searchMatches =
+                !query ||
+                searchableText.includes(query);
+
+
+            const visible =
+                filterMatches && searchMatches;
+
+
+            row.style.display =
+                visible ? "" : "none";
+
+
+            if (visible) {
+                visibleCount++;
+            }
+
+        });
+
+
+        if (resultCount) {
+
+            resultCount.textContent =
+                `${visibleCount} participant${visibleCount === 1 ? "" : "s"}`;
+
+        }
+
+
+        if (empty) {
+
+            empty.classList.toggle(
+                "d-none",
+                visibleCount !== 0
+            );
+
+        }
+
+    }
+
+
+    filters.forEach((filter) => {
+
+        filter.addEventListener("click", () => {
+
+            filters.forEach((item) => {
+                item.classList.remove("active");
+            });
+
+            filter.classList.add("active");
+
+            selectedFilter =
+                filter.dataset.participantFilter;
+
+            updateParticipants();
+
+        });
+
+    });
+
+
+    if (search) {
+
+        search.addEventListener(
+            "input",
+            updateParticipants
+        );
+
+    }
+
+
+    /* Copy registration ID */
+
+    document.querySelectorAll(
+        ".participant-copy"
+    ).forEach((button) => {
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                const value =
+                    button.dataset.copy;
+
+                if (!value) {
+                    return;
+                }
+
+
+                try {
+
+                    await navigator.clipboard.writeText(
+                        value
+                    );
+
+                    button.innerHTML =
+                        '<i class="bi bi-check-lg"></i>';
+
+                    button.classList.add("copied");
+
+
+                    setTimeout(() => {
+
+                        button.innerHTML =
+                            '<i class="bi bi-copy"></i>';
+
+                        button.classList.remove(
+                            "copied"
+                        );
+
+                    }, 1400);
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Could not copy registration number.",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+    updateParticipants();
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+
+{% block title %}Competition Scores{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(245,158,11,.12);color:var(--amber);">
+                    SCORE MANAGEMENT
+                </span>
+
+                <span class="small muted">
+                    Competition operations
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Enter and update scores for competition teams.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('organizer_competition', event_id=event.id) }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Competition
+        </a>
+
+    </div>
+
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Teams
+                </div>
+
+                <div class="fs-4 fw-bold">
+                    {{ teams|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Rounds
+                </div>
+
+                <div class="fs-4 fw-bold">
+                    {{ rounds|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Current round
+                </div>
+
+                <div class="fw-bold">
+                    {{ selected_round.name if selected_round else "No round" }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if not rounds %}
+
+    <!-- No rounds -->
+    <div class="cardx p-5 text-center">
+
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:72px;height:72px;background:rgba(245,158,11,.10);color:var(--amber);">
+
+            <i class="bi bi-trophy fs-2"></i>
+
+        </div>
+
+        <h4 class="mb-2">
+            No competition rounds yet
+        </h4>
+
+        <p class="muted mb-4">
+            Create at least one round before entering scores.
+        </p>
+
+        <a
+            href="{{ url_for('organizer_competition', event_id=event.id) }}"
+            class="btn btn-brand"
+        >
+            Manage Rounds
+        </a>
+
+    </div>
+
+
+    {% elif not teams %}
+
+    <!-- No teams -->
+    <div class="cardx p-5 text-center">
+
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:72px;height:72px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+            <i class="bi bi-people fs-2"></i>
+
+        </div>
+
+        <h4 class="mb-2">
+            No teams registered
+        </h4>
+
+        <p class="muted mb-0">
+            Scores can be entered once students create competition teams.
+        </p>
+
+    </div>
+
+
+    {% else %}
+
+    <!-- Round selector -->
+    <div class="cardx p-4 mb-4">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-lg-8">
+
+                <label class="form-label fw-semibold">
+                    Score this round
+                </label>
+
+                <select
+                    class="form-select form-select-lg"
+                    id="roundSelector"
+                >
+
+                    {% for round in rounds %}
+
+                    <option
+                        value="{{ round.id }}"
+                        {% if selected_round and selected_round.id == round.id %}
+                            selected
+                        {% endif %}
+                    >
+                        Round {{ round.round_number }} · {{ round.name }} · {{ round.status|title }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="col-lg-4">
+
+                {% if selected_round and selected_round.status == "upcoming" %}
+
+                <div class="rounded-3 p-3"
+                     style="background:rgba(245,158,11,.10);color:var(--amber);">
+
+                    <i class="bi bi-lock me-2"></i>
+                    Round has not started yet.
+
+                </div>
+
+                {% elif selected_round %}
+
+                <div class="rounded-3 p-3"
+                     style="background:rgba(20,184,166,.10);color:var(--teal);">
+
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Scores can be updated.
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Score table -->
+    {% if selected_round %}
+
+    <div class="cardx overflow-hidden">
+
+        <div class="p-4 p-lg-5"
+             style="border-bottom:1px solid var(--border);">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div>
+
+                    <div class="small fw-bold muted mb-1">
+                        ROUND {{ selected_round.round_number }}
+                    </div>
+
+                    <h4 class="mb-1">
+                        {{ selected_round.name }}
+                    </h4>
+
+                    <p class="muted small mb-0">
+                        Enter a score for each team and save it.
+                    </p>
+
+                </div>
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="
+                      {% if selected_round.status == 'active' %}
+                          background:rgba(20,184,166,.10);color:var(--teal);
+                      {% elif selected_round.status == 'completed' %}
+                          background:rgba(16,185,129,.12);color:var(--success);
+                      {% else %}
+                          background:rgba(245,158,11,.12);color:var(--amber);
+                      {% endif %}
+                      ">
+                    {{ selected_round.status|title }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0 competition-score-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th class="ps-4">
+                            Team
+                        </th>
+
+                        <th>
+                            Captain
+                        </th>
+
+                        <th>
+                            Current total
+                        </th>
+
+                        <th class="pe-4">
+                            Round score
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for team in teams %}
+
+                    <tr>
+
+                        <td class="ps-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div
+                                    class="rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:42px;height:42px;background:rgba(139,124,255,.12);color:var(--brand2);"
+                                >
+                                    <i class="bi bi-people"></i>
+                                </div>
+
+                                <div>
+
+                                    <div class="fw-bold">
+                                        {{ team.name }}
+                                    </div>
+
+                                    <div class="small muted">
+                                        {{ team.members|length }}
+                                        member{% if team.members|length != 1 %}s{% endif %}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            <span class="small">
+                                {{ team.captain.name }}
+                            </span>
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="fw-bold"
+                                style="color:var(--brand);"
+                            >
+                                {{ team.points|round(1) }}
+                            </span>
+
+                            <span class="small muted">
+                                pts
+                            </span>
+
+                        </td>
+
+
+                        <td class="pe-4">
+
+                            {% if selected_round.status == "upcoming" %}
+
+                            <span class="small muted">
+                                Round not started
+                            </span>
+
+                            {% else %}
+
+                            <form
+                                method="post"
+                                class="d-flex gap-2 justify-content-end"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="round_id"
+                                    value="{{ selected_round.id }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="team_id"
+                                    value="{{ team.id }}"
+                                >
+
+
+                                <input
+                                    type="number"
+                                    name="score"
+                                    class="form-control"
+                                    style="max-width:140px;"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ scores.get(team.id, '') }}"
+                                    placeholder="0"
+                                    required
+                                >
+
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-brand"
+                                >
+                                    <i class="bi bi-check2 me-1"></i>
+                                    Save
+                                </button>
+
+                            </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const selector =
+        document.getElementById("roundSelector");
+
+
+    if (!selector) {
+        return;
+    }
+
+
+    selector.addEventListener(
+        "change",
+        function () {
+
+            const roundId =
+                this.value;
+
+            const url =
+                new URL(
+                    window.location.href
+                );
+
+            url.searchParams.set(
+                "round_id",
+                roundId
+            );
+
+            window.location.href =
+                url.toString();
+
+        }
+    );
+
+});
+
+</script>
+
+{% endblock %}

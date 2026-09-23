@@ -1,0 +1,825 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    Command Center
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+
+    <!-- =====================================================
+         COMMAND CENTER HEADER
+    ====================================================== -->
+
+    <div class="command-header">
+
+        <div class="command-header-main">
+
+            <div class="command-eyebrow">
+                <span class="command-live-dot"></span>
+                LIVE EVENT COMMAND CENTER
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <div class="command-event-meta">
+
+                <span>
+                    <i class="bi bi-calendar3"></i>
+                    {{ event.start_datetime.strftime('%d %b %Y') }}
+                </span>
+
+                <span>
+                    <i class="bi bi-clock"></i>
+                    {{ event.start_datetime.strftime('%I:%M %p') }}
+                </span>
+
+                <span>
+                    <i class="bi bi-geo-alt"></i>
+                    {{ event.venue.name }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="command-status-pill">
+            <span class="command-status-dot"></span>
+            {{ event.status|upper }}
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LIVE METRICS
+    ====================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- REGISTERED -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="command-metric">
+
+                <div class="command-metric-top">
+
+                    <div class="command-metric-icon purple">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <span class="command-metric-caption">
+                        REGISTRATIONS
+                    </span>
+
+                </div>
+
+                <div class="command-metric-value">
+                    {{ event.active_registrations }}
+                </div>
+
+                <div class="command-metric-label">
+                    Students registered
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHECKED IN -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="command-metric">
+
+                <div class="command-metric-top">
+
+                    <div class="command-metric-icon teal">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+
+                    <span class="command-metric-caption">
+                        CHECKED IN
+                    </span>
+
+                </div>
+
+                <div class="command-metric-value">
+                    {{ event.attendance_count }}
+                </div>
+
+                <div class="command-metric-label">
+                    Attendance recorded
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REMAINING -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="command-metric">
+
+                <div class="command-metric-top">
+
+                    <div class="command-metric-icon amber">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <span class="command-metric-caption">
+                        REMAINING
+                    </span>
+
+                </div>
+
+                <div class="command-metric-value">
+                    {{ event.active_registrations - event.attendance_count }}
+                </div>
+
+                <div class="command-metric-label">
+                    Registered students yet to check in
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDANCE -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="command-metric">
+
+                <div class="command-metric-top">
+
+                    <div class="command-metric-icon coral">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+
+                    <span class="command-metric-caption">
+                        ATTENDANCE
+                    </span>
+
+                </div>
+
+                <div class="command-metric-value">
+                    {{ ((event.attendance_count / event.active_registrations) * 100)|round(1) if event.active_registrations else 0 }}%
+                </div>
+
+                <div class="command-metric-label">
+                    Current attendance rate
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN COMMAND GRID
+    ====================================================== -->
+
+    <div class="row g-4">
+
+
+        <!-- =================================================
+             LEFT COLUMN
+        ================================================== -->
+
+        <div class="col-lg-8">
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="cardx command-panel">
+
+                <div class="command-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            OPERATIONS
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Quick actions
+                        </h4>
+
+                    </div>
+
+
+                    <a
+                        href="{{ url_for('organizer_analytics', event_id=event.id) }}"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        Analytics
+                    </a>
+
+                </div>
+
+
+                <div class="row g-3 mt-1">
+
+
+                    <!-- SCAN QR -->
+
+                    <div class="col-md-4">
+
+                        <a
+                            href="{{ url_for('organizer_attendance', event_id=event.id) }}"
+                            class="command-action primary"
+                        >
+
+                            <div class="command-action-icon">
+                                <i class="bi bi-qr-code-scan"></i>
+                            </div>
+
+                            <div class="command-action-title">
+                                Scan QR
+                            </div>
+
+                            <div class="command-action-description">
+                                Check students in at the venue.
+                            </div>
+
+                            <div class="command-action-arrow">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- PARTICIPANTS -->
+
+                    <div class="col-md-4">
+
+                        <a
+                            href="{{ url_for('organizer_registrations', event_id=event.id) }}"
+                            class="command-action"
+                        >
+
+                            <div class="command-action-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+
+                            <div class="command-action-title">
+                                Participants
+                            </div>
+
+                            <div class="command-action-description">
+                                View registrations and student details.
+                            </div>
+
+                            <div class="command-action-arrow">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- CERTIFICATES -->
+
+                    <div class="col-md-4">
+
+                        <button
+                            type="button"
+                            class="command-action command-action-button"
+                            id="generateCertificatesButton"
+                            onclick="generateCertificates()"
+                        >
+
+                            <div class="command-action-icon">
+                                <i class="bi bi-award"></i>
+                            </div>
+
+                            <div class="command-action-title">
+                                Certificates
+                            </div>
+
+                            <div class="command-action-description">
+                                Generate certificates for attendees.
+                            </div>
+
+                            <div class="command-action-arrow">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </div>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CERTIFICATE RESULT -->
+
+                <div
+                    id="certificateResult"
+                    class="command-result d-none"
+                ></div>
+
+            </div>
+
+
+            <!-- ANNOUNCEMENTS -->
+
+            <div class="cardx command-panel mt-4">
+
+                <div class="command-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            COMMUNICATION
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Announcements
+                        </h4>
+
+                    </div>
+
+                    <div class="command-section-icon">
+                        <i class="bi bi-megaphone"></i>
+                    </div>
+
+                </div>
+
+
+                <p class="muted small command-panel-description">
+                    Send an event-specific update to students who are registered for this event.
+                </p>
+
+
+                <form
+                    method="post"
+                    action="{{ url_for('organizer_announcement', event_id=event.id) }}"
+                    class="command-announcement-form"
+                >
+
+                    <div class="row g-3">
+
+
+                        <div class="col-md-5">
+
+                            <label
+                                for="announcementTitle"
+                                class="command-form-label"
+                            >
+                                Announcement title
+                            </label>
+
+                            <input
+                                id="announcementTitle"
+                                type="text"
+                                class="form-control"
+                                name="title"
+                                placeholder="e.g. Venue changed"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-7">
+
+                            <label
+                                for="announcementMessage"
+                                class="command-form-label"
+                            >
+                                Message to registered students
+                            </label>
+
+                            <input
+                                id="announcementMessage"
+                                type="text"
+                                class="form-control"
+                                name="message"
+                                placeholder="Write your announcement..."
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-12">
+
+                            <button
+                                type="submit"
+                                class="btn btn-brand"
+                            >
+                                <i class="bi bi-send me-1"></i>
+                                Send Announcement
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT COLUMN
+        ================================================== -->
+
+        <div class="col-lg-4">
+
+
+            <!-- CAPACITY -->
+
+            <div class="cardx command-panel">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            REGISTRATION CAPACITY
+                        </div>
+
+                        <div class="command-capacity-number">
+                            {{ event.progress_percent }}%
+                        </div>
+
+                    </div>
+
+                    <div class="command-section-icon">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="command-progress-wrap">
+
+                    <div class="progress command-progress">
+
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            style="width:{{ event.progress_percent }}%"
+                            aria-valuenow="{{ event.progress_percent }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="command-capacity-meta">
+
+                    <div>
+
+                        <strong>
+                            {{ event.active_registrations }}
+                        </strong>
+
+                        <span>
+                            registered
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{ event.max_participants }}
+                        </strong>
+
+                        <span>
+                            capacity
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- OPERATIONS -->
+
+            <div class="cardx command-panel mt-4">
+
+                <div class="muted small fw-bold">
+                    EVENT OPERATIONS
+                </div>
+
+                <h4 class="mt-1">
+                    Manage event
+                </h4>
+
+
+                <div class="command-management-list">
+
+
+                    <!-- CHECKLIST -->
+
+                    <a
+                        href="{{ url_for('organizer_checklist', event_id=event.id) }}"
+                        class="command-management-item"
+                    >
+
+                        <div class="command-management-icon">
+                            <i class="bi bi-check2-square"></i>
+                        </div>
+
+                        <div class="command-management-text">
+
+                            <strong>
+                                Checklist
+                            </strong>
+
+                            <span>
+                                Track event preparation
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-right command-management-arrow"></i>
+
+                    </a>
+
+
+                    <!-- VOLUNTEERS -->
+
+                    <a
+                        href="{{ url_for('organizer_volunteers', event_id=event.id) }}"
+                        class="command-management-item"
+                    >
+
+                        <div class="command-management-icon">
+                            <i class="bi bi-person-raised-hand"></i>
+                        </div>
+
+                        <div class="command-management-text">
+
+                            <strong>
+                                Volunteers
+                            </strong>
+
+                            <span>
+                                Manage event staff
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-right command-management-arrow"></i>
+
+                    </a>
+
+
+                    <!-- BUDGET -->
+
+                    <a
+                        href="{{ url_for('organizer_budget', event_id=event.id) }}"
+                        class="command-management-item"
+                    >
+
+                        <div class="command-management-icon">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+
+                        <div class="command-management-text">
+
+                            <strong>
+                                Budget
+                            </strong>
+
+                            <span>
+                                Track event expenses
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-right command-management-arrow"></i>
+
+                    </a>
+
+
+                    <!-- RISKS -->
+
+                    <a
+                        href="{{ url_for('organizer_risks', event_id=event.id) }}"
+                        class="command-management-item"
+                    >
+
+                        <div class="command-management-icon">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+
+                        <div class="command-management-text">
+
+                            <strong>
+                                Risks
+                            </strong>
+
+                            <span>
+                                Monitor event risks
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-right command-management-arrow"></i>
+
+                    </a>
+
+
+                    <!-- RESOURCES -->
+
+                    <a
+                        href="{{ url_for('organizer_resources', event_id=event.id) }}"
+                        class="command-management-item"
+                    >
+
+                        <div class="command-management-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+
+                        <div class="command-management-text">
+
+                            <strong>
+                                Resources
+                            </strong>
+
+                            <span>
+                                Manage event equipment
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-right command-management-arrow"></i>
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- EVENT STATUS -->
+
+            <div class="command-event-state mt-4">
+
+                <div class="command-event-state-icon">
+                    <i class="bi bi-broadcast"></i>
+                </div>
+
+                <div>
+
+                    <div class="command-event-state-title">
+                        Command center is live
+                    </div>
+
+                    <div class="muted small">
+                        Updates are reflected from the current event data.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+async function generateCertificates() {
+
+    const button =
+        document.getElementById("generateCertificatesButton");
+
+    const result =
+        document.getElementById("certificateResult");
+
+    if (!button) {
+        return;
+    }
+
+
+    button.disabled = true;
+
+    button.classList.add("is-loading");
+
+    button.querySelector(".command-action-title").textContent =
+        "Generating...";
+
+
+    try {
+
+        const response = await fetch(
+            "{{ url_for('api_generate_certificates', event_id=event.id) }}",
+            {
+                method: "POST"
+            }
+        );
+
+
+        if (!response.ok) {
+            throw new Error(
+                `Request failed: ${response.status}`
+            );
+        }
+
+
+        const data = await response.json();
+
+
+        if (result) {
+
+            result.classList.remove("d-none");
+
+            result.className =
+                "command-result success";
+
+            result.innerHTML = `
+                <i class="bi bi-check-circle-fill"></i>
+                <span>
+                    ${data.generated} certificate${data.generated === 1 ? "" : "s"} generated successfully.
+                </span>
+            `;
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Certificate generation failed:",
+            error
+        );
+
+
+        if (result) {
+
+            result.classList.remove("d-none");
+
+            result.className =
+                "command-result error";
+
+            result.innerHTML = `
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>
+                    Certificate generation failed. Please try again.
+                </span>
+            `;
+
+        }
+
+
+    } finally {
+
+        button.disabled = false;
+
+        button.classList.remove("is-loading");
+
+        button.querySelector(".command-action-title").textContent =
+            "Certificates";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

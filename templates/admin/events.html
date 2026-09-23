@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+
+{% block title %}All Events{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(20,184,166,.10);color:var(--teal);">
+                    EVENT DIRECTORY
+                </span>
+
+                <span class="small muted">
+                    Administrator view
+                </span>
+            </div>
+
+            <h1 class="page-title mb-2">
+                All campus events
+            </h1>
+
+            <p class="muted mb-0">
+                View the complete event list, organizers, venues, dates and current status.
+            </p>
+        </div>
+
+        <div class="cardx px-4 py-3">
+            <div class="small muted">
+                Total events
+            </div>
+
+            <div class="fs-3 fw-bold mt-1">
+                {{ events|length }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Search + summary -->
+    <div class="cardx p-3 p-lg-4 mb-4">
+
+        <div class="row g-3 align-items-center">
+
+            <div class="col-lg-7">
+
+                <div class="input-group">
+
+                    <span class="input-group-text"
+                          style="background:var(--surface2);border-color:var(--border);color:var(--muted);">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input
+                        type="search"
+                        class="form-control"
+                        id="eventSearch"
+                        placeholder="Search by event, organizer, venue or status..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+
+                    <span class="badge rounded-pill px-3 py-2"
+                          style="background:rgba(245,158,11,.12);color:var(--amber);">
+                        Submitted
+                    </span>
+
+                    <span class="badge rounded-pill px-3 py-2"
+                          style="background:rgba(91,75,219,.10);color:var(--brand);">
+                        Published
+                    </span>
+
+                    <span class="badge rounded-pill px-3 py-2"
+                          style="background:rgba(16,185,129,.12);color:var(--success);">
+                        Completed
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Events table -->
+    <div class="cardx overflow-hidden">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 p-4 border-bottom"
+             style="border-color:var(--border) !important;">
+
+            <div>
+                <h5 class="mb-1">
+                    Event records
+                </h5>
+
+                <p class="muted small mb-0">
+                    All events currently stored in EventX.
+                </p>
+            </div>
+
+            <div class="small muted">
+                Showing <span id="visibleCount">{{ events|length }}</span> events
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0" id="eventsTable">
+
+                <thead>
+                    <tr>
+                        <th class="ps-4">Event</th>
+                        <th>Organizer</th>
+                        <th>Venue</th>
+                        <th>Date & time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for e in events %}
+
+                    <tr class="event-row">
+
+                        <!-- Event -->
+                        <td class="ps-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                {% if e.banner %}
+
+                                <div class="rounded-3 overflow-hidden flex-shrink-0"
+                                     style="width:58px;height:58px;background:var(--surface2);">
+
+                                    <img
+                                        src="{{ url_for('static', filename=e.banner) }}"
+                                        alt="{{ e.title }}"
+                                        style="width:100%;height:100%;object-fit:cover;"
+                                    >
+
+                                </div>
+
+                                {% else %}
+
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:58px;height:58px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                                    <i class="bi bi-calendar-event fs-5"></i>
+
+                                </div>
+
+                                {% endif %}
+
+
+                                <div style="min-width:180px;">
+
+                                    <div class="fw-bold event-search-title">
+                                        {{ e.title }}
+                                    </div>
+
+                                    <div class="small muted mt-1">
+                                        {{ e.category }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Organizer -->
+                        <td>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:34px;height:34px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+                                    <i class="bi bi-person"></i>
+
+                                </div>
+
+                                <span class="event-search-organizer">
+                                    {{ e.organizer.name }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Venue -->
+                        <td>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <i class="bi bi-geo-alt"
+                                   style="color:var(--teal);"></i>
+
+                                <span class="event-search-venue">
+                                    {{ e.venue.name }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Date -->
+                        <td>
+
+                            <div class="fw-semibold">
+                                {{ e.start_datetime.strftime('%d %b %Y') }}
+                            </div>
+
+                            <div class="small muted mt-1">
+                                {{ e.start_datetime.strftime('%I:%M %p') }}
+                            </div>
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td class="pe-4">
+
+                            {% if e.status == "submitted" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(245,158,11,.12);color:var(--amber);">
+                                    <i class="bi bi-hourglass-split me-1"></i>
+                                    Submitted
+                                </span>
+
+                            {% elif e.status == "published" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(91,75,219,.10);color:var(--brand);">
+                                    <i class="bi bi-broadcast me-1"></i>
+                                    Published
+                                </span>
+
+                            {% elif e.status == "completed" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(16,185,129,.12);color:var(--success);">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Completed
+                                </span>
+
+                            {% elif e.status == "cancelled" %}
+
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background:rgba(239,68,68,.12);color:var(--danger);">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Cancelled
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge-soft">
+                                    {{ e.status|title }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="5">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:70px;height:70px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                                    <i class="bi bi-calendar-x fs-2"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No events found
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    There are currently no events in EventX.
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                    <!-- Search empty state -->
+                    <tr id="searchEmpty" class="d-none">
+
+                        <td colspan="5">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:64px;height:64px;background:var(--surface2);color:var(--muted);">
+
+                                    <i class="bi bi-search fs-4"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No matching events
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Try a different event, organizer, venue or status search.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer note -->
+    <div class="d-flex align-items-start gap-2 mt-3 px-1">
+
+        <i class="bi bi-info-circle mt-1"
+           style="color:var(--brand);"></i>
+
+        <div class="small muted">
+            Approval actions are handled from the Pending Approvals section.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("eventSearch");
+    const rows = Array.from(document.querySelectorAll(".event-row"));
+    const visibleCount = document.getElementById("visibleCount");
+    const searchEmpty = document.getElementById("searchEmpty");
+
+
+    function filterEvents() {
+
+        const query = searchInput.value.trim().toLowerCase();
+
+        let visible = 0;
+
+        rows.forEach(function (row) {
+
+            const title = row.querySelector(".event-search-title")?.textContent.toLowerCase() || "";
+            const organizer = row.querySelector(".event-search-organizer")?.textContent.toLowerCase() || "";
+            const venue = row.querySelector(".event-search-venue")?.textContent.toLowerCase() || "";
+            const status = row.querySelector("td:last-child")?.textContent.toLowerCase() || "";
+
+            const matches =
+                !query ||
+                title.includes(query) ||
+                organizer.includes(query) ||
+                venue.includes(query) ||
+                status.includes(query);
+
+            row.style.display = matches ? "" : "none";
+
+            if (matches) {
+                visible++;
+            }
+
+        });
+
+
+        visibleCount.textContent = visible;
+
+        if (rows.length > 0 && visible === 0) {
+            searchEmpty.classList.remove("d-none");
+        } else {
+            searchEmpty.classList.add("d-none");
+        }
+
+    }
+
+
+    searchInput.addEventListener("input", filterEvents);
+
+});
+</script>
+
+{% endblock %}

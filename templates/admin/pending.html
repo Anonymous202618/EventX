@@ -1,0 +1,386 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approvals{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(245,158,11,.12);color:var(--amber);">
+                    ADMIN REVIEW
+                </span>
+
+                <span class="small muted">
+                    Event moderation
+                </span>
+            </div>
+
+            <h1 class="page-title mb-2">
+                Pending approvals
+            </h1>
+
+            <p class="muted mb-0">
+                Review submitted events before they become visible to students.
+            </p>
+        </div>
+
+        <div class="cardx px-4 py-3">
+            <div class="small muted">
+                Awaiting review
+            </div>
+
+            <div class="fs-3 fw-bold mt-1">
+                {{ events|length }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Approval workflow -->
+    <div class="cardx p-3 p-lg-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <span class="rounded-circle d-flex align-items-center justify-content-center"
+                      style="width:34px;height:34px;background:rgba(91,75,219,.12);color:var(--brand);">
+                    <i class="bi bi-send"></i>
+                </span>
+
+                <span class="small fw-semibold">
+                    Submitted
+                </span>
+            </div>
+
+            <div class="d-none d-md-block flex-grow-1"
+                 style="height:1px;background:var(--border);"></div>
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <span class="rounded-circle d-flex align-items-center justify-content-center"
+                      style="width:34px;height:34px;background:rgba(245,158,11,.12);color:var(--amber);">
+                    <i class="bi bi-eye"></i>
+                </span>
+
+                <span class="small fw-semibold">
+                    Admin review
+                </span>
+            </div>
+
+            <div class="d-none d-md-block flex-grow-1"
+                 style="height:1px;background:var(--border);"></div>
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <span class="rounded-circle d-flex align-items-center justify-content-center"
+                      style="width:34px;height:34px;background:rgba(16,185,129,.12);color:var(--success);">
+                    <i class="bi bi-check2"></i>
+                </span>
+
+                <span class="small fw-semibold">
+                    Published
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Pending events -->
+    <div class="stack">
+
+        {% for e in events %}
+
+        <div class="cardx overflow-hidden">
+
+            <div class="row g-0">
+
+                <!-- Banner -->
+                <div class="col-lg-4">
+
+                    {% if e.banner %}
+
+                    <div class="h-100"
+                         style="min-height:260px;background:var(--surface2);">
+
+                        <img
+                            src="{{ url_for('static', filename=e.banner) }}"
+                            alt="{{ e.title }}"
+                            class="w-100 h-100"
+                            style="min-height:260px;object-fit:cover;"
+                        >
+
+                    </div>
+
+                    {% else %}
+
+                    <div class="h-100 d-flex align-items-center justify-content-center p-4"
+                         style="min-height:260px;background:linear-gradient(135deg,rgba(91,75,219,.14),rgba(139,124,255,.06));">
+
+                        <div class="text-center">
+
+                            <div class="rounded-4 d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width:64px;height:64px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                                <i class="bi bi-calendar-event fs-3"></i>
+
+                            </div>
+
+                            <div class="small muted">
+                                No banner uploaded
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Event information -->
+                <div class="col-lg-8">
+
+                    <div class="p-4 p-xl-5">
+
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+
+                            <span class="badge-soft">
+                                {{ e.category }}
+                            </span>
+
+                            <span class="badge rounded-pill"
+                                  style="background:rgba(245,158,11,.12);color:var(--amber);">
+                                Pending review
+                            </span>
+
+                        </div>
+
+
+                        <h3 class="mb-2">
+                            {{ e.title }}
+                        </h3>
+
+
+                        <div class="d-flex flex-column gap-2 mb-4">
+
+                            <div class="d-flex align-items-center gap-2 muted small">
+                                <i class="bi bi-calendar3"
+                                   style="color:var(--brand);"></i>
+
+                                <span>
+                                    {{ e.start_datetime.strftime('%d %b %Y · %I:%M %p') }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 muted small">
+                                <i class="bi bi-clock"
+                                   style="color:var(--amber);"></i>
+
+                                <span>
+                                    {{ e.start_datetime.strftime('%I:%M %p') }}
+                                    –
+                                    {{ e.end_datetime.strftime('%I:%M %p') }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 muted small">
+                                <i class="bi bi-geo-alt"
+                                   style="color:var(--teal);"></i>
+
+                                <span>
+                                    {{ e.venue.name }}
+                                    ·
+                                    {{ e.venue.capacity }} seats
+                                </span>
+                            </div>
+
+                            {% if e.club %}
+                            <div class="d-flex align-items-center gap-2 muted small">
+                                <i class="bi bi-people"
+                                   style="color:var(--brand);"></i>
+
+                                <span>
+                                    {{ e.club.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Description -->
+                        <div class="mb-4">
+
+                            <div class="small fw-semibold mb-2">
+                                Description
+                            </div>
+
+                            <p class="muted mb-0"
+                               style="line-height:1.7;">
+                                {{ e.description[:420] }}{% if e.description|length > 420 %}...{% endif %}
+                            </p>
+
+                        </div>
+
+
+                        <!-- Review information -->
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-sm-4">
+                                <div class="rounded-3 p-3"
+                                     style="background:var(--surface2);">
+
+                                    <div class="small muted mb-1">
+                                        Event type
+                                    </div>
+
+                                    <div class="fw-semibold">
+                                        {{ e.event_type }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="rounded-3 p-3"
+                                     style="background:var(--surface2);">
+
+                                    <div class="small muted mb-1">
+                                        Capacity
+                                    </div>
+
+                                    <div class="fw-semibold">
+                                        {{ e.max_participants }}
+                                        <span class="muted fw-normal">students</span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="rounded-3 p-3"
+                                     style="background:var(--surface2);">
+
+                                    <div class="small muted mb-1">
+                                        Registration deadline
+                                    </div>
+
+                                    <div class="fw-semibold small">
+                                        {{ e.registration_deadline.strftime('%d %b · %I:%M %p') }}
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Actions -->
+                        <div class="d-flex flex-column flex-sm-row gap-2 pt-3"
+                             style="border-top:1px solid var(--border);">
+
+                            <form method="post"
+                                  action="{{ url_for('admin_reject', event_id=e.id) }}"
+                                  class="flex-sm-grow-1"
+                                  onsubmit="return confirmReject(this);">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-ghost w-100 py-2"
+                                >
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Reject Event
+                                </button>
+
+                            </form>
+
+
+                            <form method="post"
+                                  action="{{ url_for('admin_approve', event_id=e.id) }}"
+                                  class="flex-sm-grow-1"
+                                  onsubmit="prepareApproval(this);">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-brand w-100 py-2"
+                                >
+                                    <i class="bi bi-check2-circle me-2"></i>
+                                    Approve & Publish
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <!-- Empty state -->
+        <div class="cardx p-5 text-center">
+
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                 style="width:72px;height:72px;background:rgba(16,185,129,.10);color:var(--success);">
+
+                <i class="bi bi-check2-all fs-2"></i>
+
+            </div>
+
+            <h4 class="mb-2">
+                All caught up
+            </h4>
+
+            <p class="muted mb-0">
+                There are currently no events waiting for administrator approval.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<script>
+
+function confirmReject(form) {
+    return confirm(
+        "Are you sure you want to reject this event?"
+    );
+}
+
+
+function prepareApproval(form) {
+
+    const button = form.querySelector("button");
+
+    if (!button) {
+        return;
+    }
+
+    button.disabled = true;
+
+    button.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"></span>
+        Publishing...
+    `;
+}
+
+</script>
+
+{% endblock %}

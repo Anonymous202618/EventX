@@ -1,0 +1,820 @@
+{% extends "base.html" %}
+
+{% block title %}Organizer Checklist - EventX{% endblock %}
+
+{% block content %}
+
+<style>
+    .checklist-page {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .checklist-header {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 28px;
+        margin-bottom: 22px;
+    }
+
+    .checklist-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .checklist-eyebrow {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 7px;
+    }
+
+    .checklist-title {
+        margin: 0;
+        color: var(--text);
+        font-weight: 800;
+        font-size: 30px;
+    }
+
+    .checklist-event {
+        color: var(--muted);
+        margin-top: 7px;
+        margin-bottom: 0;
+    }
+
+    .progress-summary {
+        min-width: 210px;
+        text-align: right;
+    }
+
+    .progress-number {
+        color: var(--text);
+        font-size: 27px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .progress-label {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .progress-track {
+        height: 9px;
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 13px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: {{ progress }}%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #7c3aed, #a855f7);
+        transition: width 0.25s ease;
+    }
+
+    .checklist-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 22px;
+    }
+
+    .checklist-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .checklist-card-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .checklist-card-title {
+        margin: 0;
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .checklist-card-subtitle {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 5px 0 0;
+    }
+
+    .add-form {
+        padding: 20px 22px;
+    }
+
+    .add-form-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .checklist-input {
+        flex: 1;
+        min-width: 0;
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+
+    .checklist-input::placeholder {
+        color: var(--muted) !important;
+        opacity: 0.9;
+    }
+
+    .checklist-input:focus {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.14) !important;
+    }
+
+    .btn-add-task {
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #7c3aed, #9333ea);
+        white-space: nowrap;
+    }
+
+    .btn-add-task:hover {
+        color: #fff;
+        opacity: 0.94;
+    }
+
+    .suggestions {
+        padding: 0 22px 22px;
+    }
+
+    .suggestions-title {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+    }
+
+    .suggestion-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .suggestion-btn {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.15s ease;
+    }
+
+    .suggestion-btn:hover {
+        border-color: #8b5cf6;
+        transform: translateY(-1px);
+    }
+
+    .task-list {
+        padding: 8px 12px 14px;
+    }
+
+    .task-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .task-row:last-child {
+        border-bottom: 0;
+    }
+
+    .task-toggle {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: none;
+        border: 0;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
+        color: var(--text);
+    }
+
+    .task-checkbox {
+        width: 22px;
+        height: 22px;
+        border: 2px solid var(--border);
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: 0.15s ease;
+        color: white;
+        background: var(--bg);
+    }
+
+    .task-row.completed .task-checkbox {
+        background: #7c3aed;
+        border-color: #7c3aed;
+    }
+
+    .task-row.completed .task-checkbox i {
+        display: block;
+    }
+
+    .task-checkbox i {
+        display: none;
+        font-size: 13px;
+    }
+
+    .task-title {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .task-row.completed .task-title {
+        color: var(--muted);
+        text-decoration: line-through;
+    }
+
+    .task-state {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 9px;
+        border-radius: 999px;
+        white-space: nowrap;
+        background: rgba(245, 158, 11, 0.12);
+        color: #d97706;
+    }
+
+    .task-row.completed .task-state {
+        background: rgba(34, 197, 94, 0.12);
+        color: #16a34a;
+    }
+
+    .delete-form {
+        margin: 0;
+    }
+
+    .delete-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg);
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.15s ease;
+    }
+
+    .delete-btn:hover {
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .empty-state {
+        padding: 45px 25px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        font-size: 24px;
+    }
+
+    .empty-state h3 {
+        color: var(--text);
+        font-size: 17px;
+        margin-bottom: 7px;
+    }
+
+    .tips-card {
+        padding-bottom: 8px;
+    }
+
+    .tip {
+        display: flex;
+        gap: 11px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .tip:last-child {
+        border-bottom: 0;
+    }
+
+    .tip-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: #8b5cf6;
+    }
+
+    .tip-text strong {
+        display: block;
+        color: var(--text);
+        font-size: 13px;
+        margin-bottom: 3px;
+    }
+
+    .tip-text span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 20px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .back-link:hover {
+        color: var(--text);
+    }
+
+    @media (max-width: 850px) {
+        .checklist-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .progress-summary {
+            width: 100%;
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .checklist-header {
+            padding: 21px;
+        }
+
+        .checklist-title {
+            font-size: 25px;
+        }
+
+        .add-form-row {
+            flex-direction: column;
+        }
+
+        .btn-add-task {
+            width: 100%;
+        }
+
+        .task-state {
+            display: none;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <div class="checklist-page">
+
+        <!-- Header -->
+        <div class="checklist-header">
+
+            <div class="checklist-header-top">
+
+                <div>
+                    <div class="checklist-eyebrow">
+                        Event Operations
+                    </div>
+
+                    <h1 class="checklist-title">
+                        Organizer Checklist
+                    </h1>
+
+                    <p class="checklist-event">
+                        {{ event.title }}
+                    </p>
+                </div>
+
+                <div class="progress-summary">
+
+                    <div class="progress-number">
+                        {{ progress }}%
+                    </div>
+
+                    <div class="progress-label">
+                        {{ completed_items }} of {{ total_items }} tasks completed
+                    </div>
+
+                    <div class="progress-track">
+                        <div class="progress-fill"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="checklist-grid">
+
+            <!-- Main Checklist -->
+            <div>
+
+                <div class="checklist-card">
+
+                    <div class="checklist-card-header">
+
+                        <h2 class="checklist-card-title">
+                            Preparation Tasks
+                        </h2>
+
+                        <p class="checklist-card-subtitle">
+                            Track everything that needs to be completed before the event.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Add Task -->
+                    <form
+                        method="POST"
+                        class="add-form"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="action"
+                            value="add"
+                        >
+
+                        <div class="add-form-row">
+
+                            <input
+                                type="text"
+                                name="title"
+                                id="checklistTitle"
+                                class="form-control checklist-input"
+                                maxlength="180"
+                                placeholder="Add a preparation task..."
+                                autocomplete="off"
+                                required
+                            >
+
+                            <button
+                                type="submit"
+                                class="btn btn-add-task"
+                            >
+                                <i class="bi bi-plus-lg me-1"></i>
+                                Add Task
+                            </button>
+
+                        </div>
+
+                    </form>
+
+
+                    <!-- Suggested Tasks -->
+                    <div class="suggestions">
+
+                        <div class="suggestions-title">
+                            Common preparation tasks
+                        </div>
+
+                        <div class="suggestion-list">
+
+                            <button
+                                type="button"
+                                class="suggestion-btn"
+                                onclick="setChecklistTask('Confirm venue booking')"
+                            >
+                                Venue booking
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-btn"
+                                onclick="setChecklistTask('Finalize event poster')"
+                            >
+                                Event poster
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-btn"
+                                onclick="setChecklistTask('Arrange refreshments')"
+                            >
+                                Refreshments
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-btn"
+                                onclick="setChecklistTask('Prepare certificates')"
+                            >
+                                Certificates
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-btn"
+                                onclick="setChecklistTask('Assign volunteers')"
+                            >
+                                Volunteers
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Tasks -->
+                    <div class="task-list">
+
+                        {% if items %}
+
+                            {% for item in items %}
+
+                                <div class="task-row {% if item.completed %}completed{% endif %}">
+
+                                    <form
+                                        method="POST"
+                                        class="task-toggle"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="toggle"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="item_id"
+                                            value="{{ item.id }}"
+                                        >
+
+                                        <span class="task-checkbox">
+                                            <i class="bi bi-check-lg"></i>
+                                        </span>
+
+                                        <span class="task-title">
+                                            {{ item.title }}
+                                        </span>
+
+                                        <span class="task-state">
+                                            {% if item.completed %}
+                                                Completed
+                                            {% else %}
+                                                Pending
+                                            {% endif %}
+                                        </span>
+
+                                    </form>
+
+
+                                    <form
+                                        method="POST"
+                                        class="delete-form"
+                                        onsubmit="return confirm('Delete this checklist item?');"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="delete"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="item_id"
+                                            value="{{ item.id }}"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="delete-btn"
+                                            title="Delete task"
+                                            aria-label="Delete task"
+                                        >
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    <i class="bi bi-check2-square"></i>
+                                </div>
+
+                                <h3>No checklist items yet</h3>
+
+                                <p class="mb-0">
+                                    Add your first preparation task above to start tracking the event.
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Sidebar -->
+            <div>
+
+                <div class="checklist-card tips-card">
+
+                    <div class="checklist-card-header">
+
+                        <h2 class="checklist-card-title">
+                            Preparation Guide
+                        </h2>
+
+                        <p class="checklist-card-subtitle">
+                            Useful items to keep your event on track.
+                        </p>
+
+                    </div>
+
+
+                    <div class="tip">
+
+                        <div class="tip-icon">
+                            <i class="bi bi-building"></i>
+                        </div>
+
+                        <div class="tip-text">
+                            <strong>Venue</strong>
+                            <span>
+                                Confirm the booking, capacity and required setup.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tip">
+
+                        <div class="tip-icon">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+
+                        <div class="tip-text">
+                            <strong>Promotion</strong>
+                            <span>
+                                Finalize posters and share important event information.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tip">
+
+                        <div class="tip-icon">
+                            <i class="bi bi-cup-hot"></i>
+                        </div>
+
+                        <div class="tip-text">
+                            <strong>Refreshments</strong>
+                            <span>
+                                Confirm quantities, timing and delivery arrangements.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tip">
+
+                        <div class="tip-icon">
+                            <i class="bi bi-award"></i>
+                        </div>
+
+                        <div class="tip-text">
+                            <strong>Certificates</strong>
+                            <span>
+                                Prepare certificate requirements before the event ends.
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tip">
+
+                        <div class="tip-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div class="tip-text">
+                            <strong>Volunteers</strong>
+                            <span>
+                                Assign responsibilities and make sure everyone knows their role.
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('organizer_event', event_id=event.id) }}"
+            class="back-link"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Back to Event Command Center
+        </a>
+
+    </div>
+</div>
+
+
+<script>
+    function setChecklistTask(task) {
+        const input = document.getElementById("checklistTitle");
+
+        if (!input) {
+            return;
+        }
+
+        input.value = task;
+        input.focus();
+
+        input.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+
+    document.querySelectorAll(".task-toggle").forEach(function (form) {
+        form.addEventListener("click", function () {
+            form.submit();
+        });
+    });
+</script>
+
+{% endblock %}

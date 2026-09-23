@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+
+{% block title %}My Events{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+    <!-- PAGE HEADER -->
+    <div class="page-head">
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+                <div class="muted small fw-bold">STUDENT PORTAL</div>
+                <h1 class="page-title mb-2">My Events</h1>
+                <p class="muted mb-0">
+                    Track your registrations, event passes, attendance and certificates.
+                </p>
+            </div>
+
+            <a href="{{ url_for('events') }}" class="btn btn-brand">
+                <i class="bi bi-search me-1"></i>
+                Discover Events
+            </a>
+
+        </div>
+    </div>
+
+
+    <!-- SUMMARY METRICS -->
+    {% set active_count = regs
+        |selectattr('status', 'in', ['registered', 'waitlisted'])
+        |list
+        |length
+    %}
+
+    {% set attended_count = regs
+        |selectattr('attendance')
+        |list
+        |length
+    %}
+
+    {% set ns = namespace(certificates=0) %}
+    {% for r in regs %}
+        {% if r.certificate %}
+            {% set ns.certificates = ns.certificates + 1 %}
+        {% endif %}
+    {% endfor %}
+
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+            <div class="metric my-event-stat">
+                <div class="kpi-icon">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+
+                <div class="value mt-3">
+                    {{ regs|length }}
+                </div>
+
+                <div class="label">
+                    Total Registrations
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <div class="metric my-event-stat">
+                <div class="kpi-icon">
+                    <i class="bi bi-ticket-perforated"></i>
+                </div>
+
+                <div class="value mt-3">
+                    {{ active_count }}
+                </div>
+
+                <div class="label">
+                    Active
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <div class="metric my-event-stat">
+                <div class="kpi-icon">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+
+                <div class="value mt-3">
+                    {{ attended_count }}
+                </div>
+
+                <div class="label">
+                    Attended
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+            <div class="metric my-event-stat">
+                <div class="kpi-icon">
+                    <i class="bi bi-award"></i>
+                </div>
+
+                <div class="value mt-3">
+                    {{ ns.certificates }}
+                </div>
+
+                <div class="label">
+                    Certificates
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTER BAR -->
+    <div class="cardx p-2 mb-4 my-events-filter-card">
+
+        <div class="my-events-filters">
+
+            <button
+                type="button"
+                class="my-event-filter active"
+                data-filter="all"
+            >
+                All
+                <span>{{ regs|length }}</span>
+            </button>
+
+
+            <button
+                type="button"
+                class="my-event-filter"
+                data-filter="active"
+            >
+                Active
+                <span>{{ active_count }}</span>
+            </button>
+
+
+            <button
+                type="button"
+                class="my-event-filter"
+                data-filter="attended"
+            >
+                Attended
+                <span>{{ attended_count }}</span>
+            </button>
+
+
+            <button
+                type="button"
+                class="my-event-filter"
+                data-filter="cancelled"
+            >
+                Cancelled
+                <span>
+                    {{ regs|selectattr('status', 'equalto', 'cancelled')|list|length }}
+                </span>
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- EVENTS -->
+    <div id="myEventsList" class="stack">
+
+        {% for r in regs %}
+
+            {% set status_type = 'active' %}
+
+            {% if r.status == 'cancelled' %}
+                {% set status_type = 'cancelled' %}
+            {% elif r.attendance %}
+                {% set status_type = 'attended' %}
+            {% endif %}
+
+
+            {% set feedback_ns = namespace(submitted=false) %}
+
+            {% for fb in r.event.feedback %}
+                {% if fb.student_id == current_user.id %}
+                    {% set feedback_ns.submitted = true %}
+                {% endif %}
+            {% endfor %}
+
+
+            <article
+                class="my-event-card"
+                data-event-status="{{ status_type }}"
+            >
+
+                <!-- EVENT IMAGE -->
+                <div class="my-event-image-wrap">
+
+                    {% if r.event.banner %}
+
+                        <img
+                            src="{{ url_for('static', filename=r.event.banner) }}"
+                            class="my-event-image"
+                            alt="{{ r.event.title }}"
+                        >
+
+                    {% else %}
+
+                        <div class="my-event-image-placeholder">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- EVENT CONTENT -->
+                <div class="my-event-content">
+
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        <div>
+
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+
+                                <span class="badge-soft category-badge category-{{ r.event.category|lower|replace(' ', '-') }}">
+                                    {{ r.event.category }}
+                                </span>
+
+
+                                {% if r.status == 'registered' %}
+
+                                    {% if r.attendance %}
+
+                                        <span class="event-status-chip status-attended">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Attended
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="event-status-chip status-registered">
+                                            <i class="bi bi-check-circle"></i>
+                                            Registered
+                                        </span>
+
+                                    {% endif %}
+
+
+                                {% elif r.status == 'waitlisted' %}
+
+                                    <span class="event-status-chip status-waitlisted">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        Waitlisted
+                                    </span>
+
+
+                                {% elif r.status == 'cancelled' %}
+
+                                    <span class="event-status-chip status-cancelled">
+                                        <i class="bi bi-x-circle"></i>
+                                        Cancelled
+                                    </span>
+
+
+                                {% else %}
+
+                                    <span class="event-status-chip">
+                                        {{ r.status|title }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <a
+                                href="{{ url_for('event_detail', event_id=r.event.id) }}"
+                                class="my-event-title"
+                            >
+                                {{ r.event.title }}
+                            </a>
+
+                        </div>
+
+
+                        <a
+                            href="{{ url_for('event_detail', event_id=r.event.id) }}"
+                            class="my-event-open"
+                            title="Open event"
+                        >
+                            <i class="bi bi-arrow-up-right"></i>
+                        </a>
+
+                    </div>
+
+
+                    <!-- EVENT META -->
+                    <div class="my-event-meta">
+
+                        <div>
+                            <i class="bi bi-calendar3"></i>
+
+                            <span>
+                                {{ r.event.start_datetime.strftime('%d %b %Y') }}
+                            </span>
+                        </div>
+
+
+                        <div>
+                            <i class="bi bi-clock"></i>
+
+                            <span>
+                                {{ r.event.start_datetime.strftime('%I:%M %p') }}
+                            </span>
+                        </div>
+
+
+                        <div>
+                            <i class="bi bi-geo-alt"></i>
+
+                            <span>
+                                {{ r.event.venue.name }}
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- EVENT JOURNEY -->
+                    {% if r.status != 'cancelled' %}
+
+                        <div class="event-journey my-event-journey">
+
+                            <!-- REGISTERED -->
+                            <div class="journey-step completed">
+
+                                <div class="journey-icon">
+                                    <i class="bi bi-check-lg"></i>
+                                </div>
+
+                                <div class="journey-label">
+                                    Registered
+                                </div>
+
+                            </div>
+
+
+                            <div class="journey-line {% if r.attendance %}completed{% endif %}"></div>
+
+
+                            <!-- ATTENDED -->
+                            <div class="journey-step {% if r.attendance %}completed{% else %}pending{% endif %}">
+
+                                <div class="journey-icon">
+
+                                    {% if r.attendance %}
+                                        <i class="bi bi-check-lg"></i>
+                                    {% else %}
+                                        <i class="bi bi-clock"></i>
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="journey-label">
+                                    Attendance
+                                </div>
+
+                            </div>
+
+
+                            <div class="journey-line {% if feedback_ns.submitted or r.certificate %}completed{% endif %}"></div>
+
+
+                            <!-- FEEDBACK -->
+                            <div class="journey-step {% if feedback_ns.submitted %}completed{% else %}pending{% endif %}">
+
+                                <div class="journey-icon">
+
+                                    {% if feedback_ns.submitted %}
+                                        <i class="bi bi-check-lg"></i>
+                                    {% else %}
+                                        <i class="bi bi-chat-left-text"></i>
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="journey-label">
+                                    Feedback
+                                </div>
+
+                            </div>
+
+
+                            <div class="journey-line {% if r.certificate %}completed{% endif %}"></div>
+
+
+                            <!-- CERTIFICATE -->
+                            <div class="journey-step {% if r.certificate %}completed{% else %}pending{% endif %}">
+
+                                <div class="journey-icon">
+
+                                    {% if r.certificate %}
+                                        <i class="bi bi-check-lg"></i>
+                                    {% else %}
+                                        <i class="bi bi-award"></i>
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="journey-label">
+                                    Certificate
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="cancelled-event-note">
+
+                            <i class="bi bi-info-circle"></i>
+
+                            <span>
+                                This registration has been cancelled.
+                            </span>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- ACTIONS -->
+                    <div class="my-event-actions">
+
+                        <a
+                            href="{{ url_for('event_detail', event_id=r.event.id) }}"
+                            class="btn btn-ghost btn-sm"
+                        >
+                            <i class="bi bi-eye me-1"></i>
+                            Details
+                        </a>
+
+
+                        {% if r.status == 'registered' and not r.attendance %}
+
+                            <a
+                                href="{{ url_for('student_qr', registration_id=r.id) }}"
+                                class="btn btn-brand btn-sm"
+                            >
+                                <i class="bi bi-qr-code me-1"></i>
+                                QR Pass
+                            </a>
+
+                        {% endif %}
+
+
+                        {% if r.attendance and not feedback_ns.submitted %}
+
+                            <a
+                                href="{{ url_for('event_detail', event_id=r.event.id) }}#feedback"
+                                class="btn btn-sm btn-soft-brand"
+                            >
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                Give Feedback
+                            </a>
+
+                        {% elif feedback_ns.submitted %}
+
+                            <span class="action-complete">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Feedback Submitted
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if r.certificate %}
+
+                            <a
+                                href="{{ url_for('certificate_download', certificate_id=r.certificate.id) }}"
+                                class="btn btn-brand btn-sm"
+                            >
+                                <i class="bi bi-award me-1"></i>
+                                Certificate
+                            </a>
+
+                        {% endif %}
+
+
+                        {% if r.status in ['registered', 'waitlisted'] and not r.attendance %}
+
+                            <form
+                                method="post"
+                                action="{{ url_for('cancel_registration', registration_id=r.id) }}"
+                                class="ms-auto"
+                                onsubmit="return confirm('Cancel this event registration?');"
+                            >
+                                <button
+                                    type="submit"
+                                    class="btn btn-ghost btn-sm text-danger"
+                                >
+                                    <i class="bi bi-x-lg me-1"></i>
+                                    Cancel
+                                </button>
+                            </form>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        {% else %}
+
+            <!-- EMPTY STATE -->
+            <div class="cardx p-5 text-center my-events-empty">
+
+                <div class="my-events-empty-icon">
+                    <i class="bi bi-calendar2-plus"></i>
+                </div>
+
+                <h4 class="mt-4 mb-2">
+                    No registered events yet
+                </h4>
+
+                <p class="muted mb-4">
+                    Discover campus events and register for something interesting.
+                </p>
+
+                <a
+                    href="{{ url_for('events') }}"
+                    class="btn btn-brand"
+                >
+                    <i class="bi bi-search me-1"></i>
+                    Discover Events
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- FILTER EMPTY MESSAGE -->
+    <div
+        id="myEventsFilterEmpty"
+        class="cardx p-5 text-center my-events-empty d-none"
+    >
+        <div class="my-events-empty-icon">
+            <i class="bi bi-funnel"></i>
+        </div>
+
+        <h4 class="mt-4 mb-2">
+            Nothing here yet
+        </h4>
+
+        <p class="muted mb-0">
+            There are no events in this category.
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const filters = document.querySelectorAll(".my-event-filter");
+    const cards = document.querySelectorAll(".my-event-card");
+    const emptyMessage = document.getElementById("myEventsFilterEmpty");
+
+
+    filters.forEach((filter) => {
+
+        filter.addEventListener("click", () => {
+
+            filters.forEach((item) => {
+                item.classList.remove("active");
+            });
+
+            filter.classList.add("active");
+
+            const selected = filter.dataset.filter;
+            let visibleCount = 0;
+
+
+            cards.forEach((card) => {
+
+                const status = card.dataset.eventStatus;
+
+                const shouldShow =
+                    selected === "all" ||
+                    status === selected;
+
+                card.style.display = shouldShow ? "" : "none";
+
+                if (shouldShow) {
+                    visibleCount++;
+                }
+
+            });
+
+
+            if (emptyMessage) {
+                emptyMessage.classList.toggle("d-none", visibleCount !== 0);
+            }
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

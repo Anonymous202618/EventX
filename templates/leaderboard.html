@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(245,158,11,.12);color:var(--amber);">
+                    LEADERBOARD
+                </span>
+
+                <span class="small muted">
+                    Competition standings
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Current team standings based on total competition points.
+            </p>
+
+        </div>
+
+
+        {% if current_user.role == "student" %}
+
+        <a
+            href="{{ url_for('student_competition', event_id=event.id) }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            My Competition
+        </a>
+
+        {% elif current_user.role in ["organizer", "admin"] %}
+
+        <a
+            href="{{ url_for('organizer_competition', event_id=event.id) }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Competition
+        </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Teams
+                </div>
+
+                <div class="fs-4 fw-bold">
+                    {{ teams|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Rounds
+                </div>
+
+                <div class="fs-4 fw-bold">
+                    {{ rounds|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Competition status
+                </div>
+
+                <div class="fw-bold">
+                    {{ competition.status|title }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if teams %}
+
+    <!-- Top 3 -->
+    <div class="row g-3 mb-4">
+
+        {% for team in teams[:3] %}
+
+        {% set position = loop.index %}
+
+        <div class="col-md-4">
+
+            <div class="cardx p-4 text-center h-100"
+                 style="
+                 {% if position == 1 %}
+                     border-top:4px solid var(--amber);
+                 {% elif position == 2 %}
+                     border-top:4px solid var(--muted);
+                 {% else %}
+                     border-top:4px solid var(--coral);
+                 {% endif %}
+                 ">
+
+                <div class="small fw-bold muted mb-3">
+                    {% if position == 1 %}
+                        1ST PLACE
+                    {% elif position == 2 %}
+                        2ND PLACE
+                    {% else %}
+                        3RD PLACE
+                    {% endif %}
+                </div>
+
+
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="
+                     width:64px;
+                     height:64px;
+                     background:
+                     {% if position == 1 %}
+                         rgba(245,158,11,.12)
+                     {% elif position == 2 %}
+                         rgba(108,117,125,.10)
+                     {% else %}
+                         rgba(255,107,107,.10)
+                     {% endif %};
+                     color:
+                     {% if position == 1 %}
+                         var(--amber)
+                     {% elif position == 2 %}
+                         var(--muted)
+                     {% else %}
+                         var(--coral)
+                     {% endif %};
+                     ">
+
+                    {% if position == 1 %}
+                        <i class="bi bi-trophy fs-3"></i>
+                    {% elif position == 2 %}
+                        <i class="bi bi-award fs-3"></i>
+                    {% else %}
+                        <i class="bi bi-medal fs-3"></i>
+                    {% endif %}
+
+                </div>
+
+
+                <h5 class="mb-1">
+                    {{ team.name }}
+                </h5>
+
+                <div class="muted small mb-3">
+                    Captain: {{ team.captain.name }}
+                </div>
+
+                <div class="fs-3 fw-bold"
+                     style="color:var(--brand);">
+                    {{ team.points|round(1) }}
+                </div>
+
+                <div class="small muted">
+                    total points
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Full standings -->
+    <div class="cardx overflow-hidden">
+
+        <div class="p-4 p-lg-5"
+             style="border-bottom:1px solid var(--border);">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div>
+
+                    <div class="small fw-bold muted mb-1">
+                        CURRENT STANDINGS
+                    </div>
+
+                    <h4 class="mb-1">
+                        Team leaderboard
+                    </h4>
+
+                    <p class="muted small mb-0">
+                        Rankings update automatically when competition scores change.
+                    </p>
+
+                </div>
+
+                <i class="bi bi-bar-chart-fill fs-4"
+                   style="color:var(--brand);"></i>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table align-middle mb-0 leaderboard-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th class="ps-4">
+                            Rank
+                        </th>
+
+                        <th>
+                            Team
+                        </th>
+
+                        <th>
+                            Captain
+                        </th>
+
+                        <th>
+                            Members
+                        </th>
+
+                        <th class="pe-4 text-end">
+                            Total points
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for team in teams %}
+
+                    <tr>
+
+                        <td class="ps-4">
+
+                            <div class="leaderboard-rank
+                                {% if loop.index == 1 %}
+                                    first
+                                {% elif loop.index == 2 %}
+                                    second
+                                {% elif loop.index == 3 %}
+                                    third
+                                {% endif %}
+                            ">
+
+                                {% if loop.index == 1 %}
+
+                                    <i class="bi bi-trophy"></i>
+
+                                {% elif loop.index == 2 %}
+
+                                    <i class="bi bi-award"></i>
+
+                                {% elif loop.index == 3 %}
+
+                                    <i class="bi bi-medal"></i>
+
+                                {% else %}
+
+                                    {{ loop.index }}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div
+                                    class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style="width:42px;height:42px;background:rgba(139,124,255,.12);color:var(--brand2);"
+                                >
+                                    <i class="bi bi-people"></i>
+                                </div>
+
+
+                                <div>
+
+                                    <div class="fw-bold">
+                                        {{ team.name }}
+                                    </div>
+
+                                    <div class="small muted">
+                                        Competition team
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            {{ team.captain.name }}
+                        </td>
+
+
+                        <td>
+                            {{ team.members|length }}
+                        </td>
+
+
+                        <td class="pe-4 text-end">
+
+                            <span class="fw-bold"
+                                  style="color:var(--brand);">
+                                {{ team.points|round(1) }}
+                            </span>
+
+                            <span class="small muted">
+                                pts
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    {% else %}
+
+    <!-- Empty state -->
+    <div class="cardx p-5 text-center">
+
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:72px;height:72px;background:var(--surface2);color:var(--muted);">
+
+            <i class="bi bi-trophy fs-2"></i>
+
+        </div>
+
+        <h4 class="mb-2">
+            No teams yet
+        </h4>
+
+        <p class="muted mb-0">
+            The leaderboard will appear once teams register for the competition.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<style>
+
+.leaderboard-table {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    --bs-table-hover-bg: var(--surface2);
+    --bs-table-hover-color: var(--text);
+
+    color: var(--text) !important;
+    background-color: var(--surface) !important;
+}
+
+.leaderboard-table > :not(caption) > * > * {
+    color: var(--text) !important;
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+.leaderboard-table thead,
+.leaderboard-table thead tr,
+.leaderboard-table thead th {
+    color: var(--muted) !important;
+    background-color: var(--surface2) !important;
+    border-color: var(--border) !important;
+}
+
+.leaderboard-table tbody,
+.leaderboard-table tbody tr,
+.leaderboard-table tbody td {
+    color: var(--text) !important;
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+.leaderboard-table tbody tr:hover td {
+    color: var(--text) !important;
+    background-color: var(--surface2) !important;
+}
+
+.leaderboard-rank {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.leaderboard-rank.first {
+    color: var(--amber);
+    background: rgba(245,158,11,.12);
+}
+
+.leaderboard-rank.second {
+    color: var(--muted);
+    background: rgba(108,117,125,.10);
+}
+
+.leaderboard-rank.third {
+    color: var(--coral);
+    background: rgba(255,107,107,.10);
+}
+
+</style>
+
+{% endblock %}

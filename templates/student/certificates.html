@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Certificates
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-head">
+
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    ACHIEVEMENTS
+                </div>
+
+                <h1 class="page-title mb-2">
+                    Your certificates
+                </h1>
+
+                <p class="muted mb-0">
+                    A record of the events and achievements you've earned through EventX.
+                </p>
+
+            </div>
+
+
+            <div class="certificate-total-badge">
+
+                <i class="bi bi-award-fill"></i>
+
+                <div>
+                    <div class="certificate-total-number">
+                        {{ certificates|length }}
+                    </div>
+
+                    <div class="certificate-total-label">
+                        Certificate{{ 's' if certificates|length != 1 else '' }} earned
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if certificates %}
+
+
+        <!-- =================================================
+             SUMMARY BANNER
+        ================================================== -->
+
+        <div class="certificate-summary cardx mb-4">
+
+            <div class="certificate-summary-icon">
+                <i class="bi bi-patch-check-fill"></i>
+            </div>
+
+            <div class="certificate-summary-content">
+
+                <div class="muted small fw-bold">
+                    VERIFIED ACHIEVEMENT RECORD
+                </div>
+
+                <h4 class="mt-1 mb-1">
+                    Your EventX certificates
+                </h4>
+
+                <p class="muted mb-0">
+                    These certificates are linked to your verified event participation
+                    and can be downloaded whenever you need them.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CERTIFICATE GRID
+        ================================================== -->
+
+        <div class="row g-4">
+
+            {% for c in certificates %}
+
+            <div class="col-md-6 col-xl-4">
+
+                <article class="certificate-card">
+
+
+                    <!-- CERTIFICATE VISUAL -->
+
+                    <div class="certificate-visual">
+
+                        {% if c.event.banner %}
+
+                            <img
+                                src="{{ url_for('static', filename=c.event.banner) }}"
+                                alt="{{ c.event.title }}"
+                                class="certificate-event-image"
+                            >
+
+                            <div class="certificate-image-overlay"></div>
+
+                        {% else %}
+
+                            <div class="certificate-visual-placeholder">
+                                <i class="bi bi-award"></i>
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="certificate-visual-badge">
+                            <i class="bi bi-patch-check-fill me-1"></i>
+                            VERIFIED
+                        </div>
+
+
+                        <div class="certificate-award-icon">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+
+                    </div>
+
+
+                    <!-- CERTIFICATE CONTENT -->
+
+                    <div class="certificate-card-content">
+
+                        <div class="muted small fw-bold">
+                            CERTIFICATE OF PARTICIPATION
+                        </div>
+
+
+                        <h4 class="certificate-event-title">
+                            {{ c.event.title }}
+                        </h4>
+
+
+                        <div class="certificate-meta">
+
+                            <div>
+
+                                <i class="bi bi-calendar3"></i>
+
+                                <span>
+                                    {{ c.generated_at.strftime('%d %B %Y') }}
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <i class="bi bi-geo-alt"></i>
+
+                                <span>
+                                    {{ c.event.venue.name }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- CERTIFICATE NUMBER -->
+
+                        <div class="certificate-number-box">
+
+                            <div>
+
+                                <div class="certificate-number-label">
+                                    CERTIFICATE NUMBER
+                                </div>
+
+                                <div
+                                    class="certificate-number"
+                                    id="certificate-{{ c.id }}"
+                                >
+                                    {{ c.certificate_number }}
+                                </div>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="certificate-copy-btn"
+                                data-copy-target="certificate-{{ c.id }}"
+                                title="Copy certificate number"
+                                aria-label="Copy certificate number"
+                            >
+                                <i class="bi bi-copy"></i>
+                            </button>
+
+                        </div>
+
+
+                        <!-- FOOTER -->
+
+                        <div class="certificate-card-footer">
+
+                            <div class="certificate-validity">
+
+                                <i class="bi bi-shield-check"></i>
+
+                                <span>
+                                    Participation verified
+                                </span>
+
+                            </div>
+
+
+                            <a
+                                href="{{ url_for('certificate_download', certificate_id=c.id) }}"
+                                class="btn btn-brand"
+                            >
+                                <i class="bi bi-download me-1"></i>
+                                Download PDF
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             EMPTY STATE
+        ================================================== -->
+
+        <div class="cardx certificate-empty">
+
+            <div class="certificate-empty-icon">
+                <i class="bi bi-award"></i>
+            </div>
+
+            <h3 class="mt-4 mb-2">
+                No certificates yet
+            </h3>
+
+            <p class="muted mx-auto mb-4">
+                Your certificates will appear here after you attend an eligible
+                event and the organizer generates your certificate.
+            </p>
+
+            <a
+                href="{{ url_for('events') }}"
+                class="btn btn-brand"
+            >
+                <i class="bi bi-calendar-event me-1"></i>
+                Discover Events
+            </a>
+
+        </div>
+
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const copyButtons =
+        document.querySelectorAll(".certificate-copy-btn");
+
+
+    copyButtons.forEach((button) => {
+
+        button.addEventListener("click", async () => {
+
+            const targetId =
+                button.dataset.copyTarget;
+
+            const target =
+                document.getElementById(targetId);
+
+            if (!target) {
+                return;
+            }
+
+            const value =
+                target.textContent.trim();
+
+
+            try {
+
+                await navigator.clipboard.writeText(value);
+
+                button.innerHTML =
+                    '<i class="bi bi-check-lg"></i>';
+
+                button.classList.add("copied");
+
+
+                setTimeout(() => {
+
+                    button.innerHTML =
+                        '<i class="bi bi-copy"></i>';
+
+                    button.classList.remove("copied");
+
+                }, 1600);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Could not copy certificate number.",
+                    error
+                );
+
+            }
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

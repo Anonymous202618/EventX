@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+
+{% block title %}Competition Management{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(139,124,255,.12);color:var(--brand2);">
+                    COMPETITION MANAGEMENT
+                </span>
+
+                <span class="small muted">
+                    Organizer workspace
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Set up the competition and manage its rounds.
+            </p>
+
+        </div>
+
+
+        <div class="d-flex flex-wrap gap-2">
+
+              <a
+                  href="{{ url_for('organizer_competition_scores', event_id=event.id) }}"
+                 class="btn btn-brand"
+               >
+                 <i class="bi bi-trophy me-1"></i>
+                 Score Teams
+                </a>
+
+                <a
+                  href="{{ url_for('organizer_event', event_id=event.id) }}"
+                 class="btn btn-ghost"
+                >
+                 <i class="bi bi-arrow-left me-1"></i>
+                 Command Center
+                </a>
+
+        </div>
+    </div>
+
+
+    {% if not competition %}
+
+    <!-- Create competition -->
+    <div class="cardx p-4 p-lg-5">
+
+        <div class="text-center py-4">
+
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                 style="width:76px;height:76px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+                <i class="bi bi-trophy fs-2"></i>
+
+            </div>
+
+            <div class="small fw-bold muted mb-2">
+                COMPETITION SETUP
+            </div>
+
+            <h3 class="mb-2">
+                Turn this event into a competition
+            </h3>
+
+            <p class="muted mx-auto mb-4"
+               style="max-width:650px;line-height:1.7;">
+                Create a competition workspace for this event.
+                You can then add rounds and later register student teams.
+            </p>
+
+
+            <form method="post">
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="create_competition"
+                >
+
+                <button
+                    type="submit"
+                    class="btn btn-brand btn-lg px-4"
+                >
+                    <i class="bi bi-trophy me-2"></i>
+                    Create Competition
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    {% else %}
+
+    <!-- Competition summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Competition status
+                </div>
+
+                <div class="fw-bold fs-4">
+                    {{ competition.status|title }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Teams
+                </div>
+
+                <div class="fw-bold fs-4">
+                    {{ competition.teams|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Rounds
+                </div>
+
+                <div class="fw-bold fs-4">
+                    {{ rounds|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Add round -->
+        <div class="col-xl-4">
+
+            <div class="cardx p-4 p-lg-5">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(245,158,11,.12);color:var(--amber);">
+
+                        <i class="bi bi-plus-circle fs-5"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="small fw-bold muted">
+                            COMPETITION ROUNDS
+                        </div>
+
+                        <h4 class="mb-0">
+                            Add a round
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <form method="post">
+
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="add_round"
+                    >
+
+
+                    <label class="form-label fw-semibold">
+                        Round name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="round_name"
+                        class="form-control form-control-lg mb-3"
+                        placeholder="e.g. Preliminary Round"
+                        maxlength="120"
+                        required
+                    >
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand w-100 py-3"
+                    >
+                        <i class="bi bi-plus-lg me-2"></i>
+                        Add Round
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- Rounds -->
+        <div class="col-xl-8">
+
+            <div class="cardx overflow-hidden">
+
+                <div class="p-4 p-lg-5"
+                     style="border-bottom:1px solid var(--border);">
+
+                    <div>
+                        <div class="small fw-bold muted mb-1">
+                            ROUND MANAGEMENT
+                        </div>
+
+                        <h4 class="mb-1">
+                            Competition rounds
+                        </h4>
+
+                        <p class="muted small mb-0">
+                            Start and complete rounds as the competition progresses.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="p-3 p-lg-4">
+
+                    <div class="stack">
+
+                        {% for round in rounds %}
+
+                        <div class="rounded-4 p-4"
+                             style="background:var(--surface2);border:1px solid var(--border);">
+
+                            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                                <div>
+
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+
+                                        <span class="badge-soft">
+                                            Round {{ round.round_number }}
+                                        </span>
+
+
+                                        {% if round.status == "upcoming" %}
+
+                                            <span class="badge rounded-pill"
+                                                  style="background:rgba(245,158,11,.12);color:var(--amber);">
+                                                Upcoming
+                                            </span>
+
+                                        {% elif round.status == "active" %}
+
+                                            <span class="badge rounded-pill"
+                                                  style="background:rgba(20,184,166,.10);color:var(--teal);">
+                                                Active
+                                            </span>
+
+                                        {% elif round.status == "completed" %}
+
+                                            <span class="badge rounded-pill"
+                                                  style="background:rgba(16,185,129,.12);color:var(--success);">
+                                                Completed
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <h5 class="mb-1">
+                                        {{ round.name }}
+                                    </h5>
+
+                                    <div class="small muted">
+                                        Round {{ round.round_number }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="d-flex flex-wrap gap-2 align-items-start">
+
+                                    {% if round.status == "upcoming" %}
+
+                                    <form method="post">
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="round_status"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="round_id"
+                                            value="{{ round.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="status"
+                                            value="active"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-brand"
+                                        >
+                                            <i class="bi bi-play-fill me-1"></i>
+                                            Start Round
+                                        </button>
+
+                                    </form>
+
+                                    {% elif round.status == "active" %}
+
+                                    <form method="post">
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="round_status"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="round_id"
+                                            value="{{ round.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="status"
+                                            value="completed"
+                                        >
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-brand"
+                                        >
+                                            <i class="bi bi-check2 me-1"></i>
+                                            Complete Round
+                                        </button>
+
+                                    </form>
+
+                                    {% else %}
+
+                                    <span class="small muted py-2">
+                                        Round completed
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="text-center p-5">
+
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width:68px;height:68px;background:rgba(245,158,11,.10);color:var(--amber);">
+
+                                <i class="bi bi-layers fs-3"></i>
+
+                            </div>
+
+                            <h5 class="mb-2">
+                                No rounds yet
+                            </h5>
+
+                            <p class="muted mb-0">
+                                Add the first competition round using the form.
+                            </p>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

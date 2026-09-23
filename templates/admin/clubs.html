@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+
+{% block title %}Clubs{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(139,124,255,.12);color:var(--brand2);">
+                    CLUB MANAGEMENT
+                </span>
+
+                <span class="small muted">
+                    Administration
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                Clubs
+            </h1>
+
+            <p class="muted mb-0">
+                Manage the clubs and student organizations associated with EventX.
+            </p>
+        </div>
+
+
+        <div class="cardx px-4 py-3">
+
+            <div class="small muted">
+                Total clubs
+            </div>
+
+            <div class="fs-3 fw-bold mt-1">
+                {{ clubs|length }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Add Club -->
+        <div class="col-xl-4">
+
+            <div class="cardx p-4 p-lg-5 h-100">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                        <i class="bi bi-plus-lg fs-5"></i>
+
+                    </div>
+
+                    <div>
+                        <div class="small fw-bold muted">
+                            NEW CLUB
+                        </div>
+
+                        <h4 class="mb-0">
+                            Add a club
+                        </h4>
+                    </div>
+
+                </div>
+
+
+                <p class="muted small mb-4">
+                    Create a club profile that organizers can associate with campus events.
+                </p>
+
+
+                <form method="post"
+                      action="{{ url_for('add_club') }}"
+                      id="addClubForm">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Club name
+                        </label>
+
+                        <input
+                            class="form-control form-control-lg"
+                            name="name"
+                            placeholder="e.g. Coding Club"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Description
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            name="description"
+                            rows="6"
+                            placeholder="Describe the club, its activities and focus..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand w-100 py-3"
+                        id="addClubBtn"
+                    >
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add Club
+                    </button>
+
+                </form>
+
+
+                <div class="d-flex gap-2 align-items-start mt-4 pt-4"
+                     style="border-top:1px solid var(--border);">
+
+                    <i class="bi bi-info-circle mt-1"
+                       style="color:var(--brand);"></i>
+
+                    <div class="small muted">
+                        Use a clear club name because it will appear in event creation and administrative views.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Club Directory -->
+        <div class="col-xl-8">
+
+            <div class="cardx overflow-hidden h-100">
+
+                <div class="p-4 p-lg-5"
+                     style="border-bottom:1px solid var(--border);">
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                        <div>
+                            <div class="small fw-bold muted mb-1">
+                                CLUB DIRECTORY
+                            </div>
+
+                            <h4 class="mb-1">
+                                Existing clubs
+                            </h4>
+
+                            <p class="muted small mb-0">
+                                Browse the clubs currently available in EventX.
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 col-lg-5">
+
+                            <div class="input-group">
+
+                                <span class="input-group-text"
+                                      style="background:var(--surface2);border-color:var(--border);color:var(--muted);">
+                                    <i class="bi bi-search"></i>
+                                </span>
+
+                                <input
+                                    type="search"
+                                    id="clubSearch"
+                                    class="form-control"
+                                    placeholder="Search clubs..."
+                                    autocomplete="off"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="p-3 p-lg-4">
+
+                    <div class="row g-3"
+                         id="clubGrid">
+
+                        {% for c in clubs %}
+
+                        <div class="col-md-6 club-item">
+
+                            <div class="rounded-4 p-4 h-100"
+                                 style="background:var(--surface2);border:1px solid var(--border);">
+
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                         style="width:46px;height:46px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+                                        <span class="fw-bold">
+                                            {{ c.name[:1]|upper }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex-grow-1"
+                                         style="min-width:0;">
+
+                                        <h5 class="mb-1 club-name">
+                                            {{ c.name }}
+                                        </h5>
+
+                                        {% if c.description %}
+
+                                        <p class="muted small mb-0 club-description"
+                                           style="line-height:1.6;">
+                                            {{ c.description }}
+                                        </p>
+
+                                        {% else %}
+
+                                        <p class="muted small mb-0">
+                                            No description provided.
+                                        </p>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="col-12">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:70px;height:70px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+                                    <i class="bi bi-people fs-2"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No clubs yet
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Add the first club using the form on the left.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+
+                        <!-- Search empty state -->
+                        <div class="col-12 d-none"
+                             id="clubSearchEmpty">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:64px;height:64px;background:var(--surface2);color:var(--muted);">
+
+                                    <i class="bi bi-search fs-4"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    No matching clubs
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Try another club name or clear the search.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer note -->
+    <div class="d-flex align-items-start gap-2 mt-3 px-1">
+
+        <i class="bi bi-diagram-3 mt-1"
+           style="color:var(--brand);"></i>
+
+        <div class="small muted">
+            Clubs can be selected by organizers while creating events.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("clubSearch");
+    const clubItems = Array.from(document.querySelectorAll(".club-item"));
+    const emptyState = document.getElementById("clubSearchEmpty");
+
+    if (!searchInput) {
+        return;
+    }
+
+
+    function filterClubs() {
+
+        const query =
+            searchInput.value.trim().toLowerCase();
+
+        let visible = 0;
+
+
+        clubItems.forEach(function (item) {
+
+            const name =
+                item.querySelector(".club-name")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+            const description =
+                item.querySelector(".club-description")?.textContent
+                    .trim()
+                    .toLowerCase() || "";
+
+
+            const matches =
+                !query ||
+                name.includes(query) ||
+                description.includes(query);
+
+
+            item.style.display =
+                matches ? "" : "none";
+
+
+            if (matches) {
+                visible++;
+            }
+
+        });
+
+
+        if (clubItems.length > 0 && visible === 0) {
+            emptyState.classList.remove("d-none");
+        } else {
+            emptyState.classList.add("d-none");
+        }
+
+    }
+
+
+    searchInput.addEventListener(
+        "input",
+        filterClubs
+    );
+
+
+    // Prevent accidental double submission.
+    const form = document.getElementById("addClubForm");
+    const button = document.getElementById("addClubBtn");
+
+    if (form && button) {
+
+        form.addEventListener("submit", function () {
+
+            if (!form.checkValidity()) {
+                return;
+            }
+
+            button.disabled = true;
+
+            button.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2"
+                      aria-hidden="true"></span>
+                Adding Club...
+            `;
+
+        });
+
+    }
+
+});
+</script>
+
+{% endblock %}

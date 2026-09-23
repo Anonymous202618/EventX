@@ -1,0 +1,713 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(91,75,219,.10);color:var(--brand);">
+                    ADMIN CONTROL CENTER
+                </span>
+
+                <span class="small muted">
+                    EventX administration
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                Campus events at a glance.
+            </h1>
+
+            <p class="muted mb-0">
+                Monitor events, approvals, users, clubs and venues from one place.
+            </p>
+        </div>
+
+        <a href="{{ url_for('admin_pending') }}"
+           class="btn btn-brand px-4">
+
+            <i class="bi bi-inbox me-2"></i>
+            Review Pending
+
+        </a>
+
+    </div>
+
+
+    <!-- Metrics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl">
+            <div class="cardx p-4 h-100">
+
+                <div class="d-flex align-items-start justify-content-between gap-3">
+
+                    <div>
+
+                        <div class="small muted mb-2">
+                            Total Events
+                        </div>
+
+                        <div class="display-6 fw-bold">
+                            {{ counts.events }}
+                        </div>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                        <i class="bi bi-calendar-event fs-5"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="small muted mt-3">
+                    All events in EventX
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl">
+            <div class="cardx p-4 h-100">
+
+                <div class="d-flex align-items-start justify-content-between gap-3">
+
+                    <div>
+
+                        <div class="small muted mb-2">
+                            Pending Approval
+                        </div>
+
+                        <div class="display-6 fw-bold"
+                             style="color:var(--amber);">
+                            {{ counts.pending }}
+                        </div>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(245,158,11,.12);color:var(--amber);">
+
+                        <i class="bi bi-hourglass-split fs-5"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="small muted mt-3">
+                    Events waiting for review
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl">
+            <div class="cardx p-4 h-100">
+
+                <div class="d-flex align-items-start justify-content-between gap-3">
+
+                    <div>
+
+                        <div class="small muted mb-2">
+                            Users
+                        </div>
+
+                        <div class="display-6 fw-bold">
+                            {{ counts.users }}
+                        </div>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(20,184,166,.10);color:var(--teal);">
+
+                        <i class="bi bi-people fs-5"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="small muted mt-3">
+                    Registered platform users
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl">
+            <div class="cardx p-4 h-100">
+
+                <div class="d-flex align-items-start justify-content-between gap-3">
+
+                    <div>
+
+                        <div class="small muted mb-2">
+                            Clubs
+                        </div>
+
+                        <div class="display-6 fw-bold">
+                            {{ counts.clubs }}
+                        </div>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(139,124,255,.12);color:var(--brand2);">
+
+                        <i class="bi bi-diagram-3 fs-5"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="small muted mt-3">
+                    Clubs managing events
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-6 col-xl">
+            <div class="cardx p-4 h-100">
+
+                <div class="d-flex align-items-start justify-content-between gap-3">
+
+                    <div>
+
+                        <div class="small muted mb-2">
+                            Venues
+                        </div>
+
+                        <div class="display-6 fw-bold">
+                            {{ counts.venues }}
+                        </div>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                        <i class="bi bi-geo-alt fs-5"></i>
+
+                    </div>
+
+                </div>
+
+                <div class="small muted mt-3">
+                    Available event venues
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Main dashboard row -->
+    <div class="row g-4">
+
+        <!-- Admin tools -->
+        <div class="col-lg-7">
+
+            <div class="cardx p-4 p-lg-5 h-100">
+
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+
+                    <div>
+
+                        <div class="small fw-bold muted mb-1">
+                            QUICK ACTIONS
+                        </div>
+
+                        <h4 class="mb-1">
+                            Administration tools
+                        </h4>
+
+                        <p class="muted small mb-0">
+                            Jump directly to the areas you manage most often.
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                        <i class="bi bi-grid fs-5"></i>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Primary actions -->
+                <div class="row g-3 mb-3">
+
+                    <div class="col-md-6">
+
+                        <a href="{{ url_for('admin_pending') }}"
+                           class="text-decoration-none">
+
+                            <div class="rounded-4 p-4 h-100"
+                                 style="background:linear-gradient(135deg,rgba(91,75,219,.12),rgba(139,124,255,.05));border:1px solid rgba(91,75,219,.15);">
+
+                                <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                         style="width:42px;height:42px;background:rgba(91,75,219,.12);color:var(--brand);">
+
+                                        <i class="bi bi-inbox fs-5"></i>
+
+                                    </div>
+
+                                    {% if counts.pending > 0 %}
+
+                                    <span class="badge rounded-pill"
+                                          style="background:rgba(245,158,11,.12);color:var(--amber);">
+
+                                        {{ counts.pending }} pending
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="badge rounded-pill"
+                                          style="background:rgba(16,185,129,.12);color:var(--success);">
+
+                                        Up to date
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="fw-bold fs-5 mb-1">
+                                    Pending Approvals
+                                </div>
+
+                                <div class="small muted">
+                                    Review submitted events and publish approved events.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <a href="{{ url_for('admin_events') }}"
+                           class="text-decoration-none">
+
+                            <div class="rounded-4 p-4 h-100"
+                                 style="background:var(--surface2);border:1px solid var(--border);">
+
+                                <div class="rounded-3 d-flex align-items-center justify-content-center mb-3"
+                                     style="width:42px;height:42px;background:rgba(20,184,166,.10);color:var(--teal);">
+
+                                    <i class="bi bi-calendar3 fs-5"></i>
+
+                                </div>
+
+                                <div class="fw-bold fs-5 mb-1">
+                                    All Events
+                                </div>
+
+                                <div class="small muted">
+                                    View and manage events across the platform.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Secondary actions -->
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_users') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-person-lines-fill me-2"></i>
+                            Users
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_clubs') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-people me-2"></i>
+                            Clubs
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_venues') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-building me-2"></i>
+                            Venues
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_resources') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-box-seam me-2"></i>
+                            Resources
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_resource_requests') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-clipboard-check me-2"></i>
+                            Resource Requests
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="{{ url_for('admin_sponsors') }}"
+                           class="btn btn-ghost w-100 py-3">
+
+                            <i class="bi bi-building-check me-2"></i>
+                            Sponsorship
+
+                        </a>
+
+                    </div>
+                    <div class="col-md-4">
+                         <a href="{{ url_for('admin_reports') }}"class="btn btn-ghost w-100 py-3">
+                          <i class="bi bi-file-earmark-bar-graph me-2"></i>
+                         Reports
+                         </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Workflow -->
+        <div class="col-lg-5">
+
+            <div class="cardx p-4 p-lg-5 h-100">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                        <i class="bi bi-diagram-3 fs-5"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="small fw-bold muted">
+                            EVENT LIFECYCLE
+                        </div>
+
+                        <h4 class="mb-0">
+                            Approval workflow
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <div class="d-flex flex-column align-items-center">
+
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;background:rgba(108,117,125,.10);color:var(--muted);">
+
+                            <i class="bi bi-file-earmark"></i>
+
+                        </div>
+
+                        <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+
+                    </div>
+
+                    <div class="pb-2">
+
+                        <div class="fw-semibold">
+                            Draft
+                        </div>
+
+                        <div class="small muted mt-1">
+                            Organizer prepares the event details.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <div class="d-flex flex-column align-items-center">
+
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;background:rgba(245,158,11,.12);color:var(--amber);">
+
+                            <i class="bi bi-send"></i>
+
+                        </div>
+
+                        <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+
+                    </div>
+
+                    <div class="pb-2">
+
+                        <div class="fw-semibold">
+                            Submitted
+                        </div>
+
+                        <div class="small muted mt-1">
+                            Event enters the administrator review queue.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <div class="d-flex flex-column align-items-center">
+
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;background:rgba(20,184,166,.10);color:var(--teal);">
+
+                            <i class="bi bi-check2"></i>
+
+                        </div>
+
+                        <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+
+                    </div>
+
+                    <div class="pb-2">
+
+                        <div class="fw-semibold">
+                            Approved
+                        </div>
+
+                        <div class="small muted mt-1">
+                            Administrator approves the submitted event.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-3 mb-4">
+
+                    <div class="d-flex flex-column align-items-center">
+
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;background:rgba(91,75,219,.10);color:var(--brand);">
+
+                            <i class="bi bi-globe2"></i>
+
+                        </div>
+
+                        <div style="width:1px;flex:1;background:var(--border);margin-top:6px;"></div>
+
+                    </div>
+
+                    <div class="pb-2">
+
+                        <div class="fw-semibold">
+                            Published
+                        </div>
+
+                        <div class="small muted mt-1">
+                            Students can discover the event and register.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-3">
+
+                    <div>
+
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:36px;height:36px;background:rgba(16,185,129,.12);color:var(--success);">
+
+                            <i class="bi bi-flag"></i>
+
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="fw-semibold">
+                            Live & completed
+                        </div>
+
+                        <div class="small muted mt-1">
+                            Attendance, certificates, feedback and reporting complete the event lifecycle.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- System overview -->
+    <div class="cardx p-4 p-lg-5 mt-4">
+
+        <div class="row g-4 align-items-center">
+
+            <div class="col-lg-7">
+
+                <div class="small fw-bold muted mb-2">
+                    EVENTX OVERVIEW
+                </div>
+
+                <h4 class="mb-2">
+                    Keep the campus event ecosystem organized.
+                </h4>
+
+                <p class="muted mb-0"
+                   style="line-height:1.7;">
+
+                    Use the admin tools to review submissions, manage platform users,
+                    maintain clubs and keep venue information ready for upcoming events.
+
+                </p>
+
+            </div>
+
+
+            <div class="col-lg-5">
+
+                <div class="row g-3">
+
+                    <div class="col-4">
+
+                        <div class="rounded-4 p-3 text-center"
+                             style="background:var(--surface2);">
+
+                            <i class="bi bi-calendar-event fs-4"
+                               style="color:var(--brand);"></i>
+
+                            <div class="small fw-semibold mt-2">
+                                Events
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-4">
+
+                        <div class="rounded-4 p-3 text-center"
+                             style="background:var(--surface2);">
+
+                            <i class="bi bi-person-check fs-4"
+                               style="color:var(--teal);"></i>
+
+                            <div class="small fw-semibold mt-2">
+                                Users
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-4">
+
+                        <div class="rounded-4 p-3 text-center"
+                             style="background:var(--surface2);">
+
+                            <i class="bi bi-geo-alt fs-4"
+                               style="color:var(--coral);"></i>
+
+                            <div class="small fw-semibold mt-2">
+                                Venues
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

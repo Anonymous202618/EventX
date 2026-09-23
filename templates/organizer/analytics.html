@@ -1,0 +1,934 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Analytics
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="page-head">
+
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    EVENT ANALYTICS
+                </div>
+
+                <h1 class="page-title mb-2">
+                    {{ event.title }}
+                </h1>
+
+                <div class="analytics-event-meta">
+
+                    <span>
+                        <i class="bi bi-calendar3"></i>
+                        {{ event.start_datetime.strftime('%d %b %Y') }}
+                    </span>
+
+                    <span>
+                        <i class="bi bi-clock"></i>
+                        {{ event.start_datetime.strftime('%I:%M %p') }}
+                    </span>
+
+                    <span>
+                        <i class="bi bi-geo-alt"></i>
+                        {{ event.venue.name }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('organizer_registrations', event_id=event.id) }}"
+                class="btn btn-ghost"
+            >
+                <i class="bi bi-people me-1"></i>
+                Participants
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TOP METRICS
+    ====================================================== -->
+
+    {% set attendance_rate =
+        ((event.attendance_count / event.active_registrations) * 100)
+        if event.active_registrations else 0
+    %}
+
+
+    {% set remaining =
+        event.active_registrations - event.attendance_count
+    %}
+
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- REGISTERED -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="analytics-metric">
+
+                <div class="analytics-metric-icon purple">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div class="analytics-metric-label">
+                    REGISTERED
+                </div>
+
+                <div class="analytics-metric-value">
+                    {{ event.active_registrations }}
+                </div>
+
+                <div class="analytics-metric-sub">
+                    Students registered
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDED -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="analytics-metric">
+
+                <div class="analytics-metric-icon teal">
+                    <i class="bi bi-person-check"></i>
+                </div>
+
+                <div class="analytics-metric-label">
+                    CHECKED IN
+                </div>
+
+                <div class="analytics-metric-value">
+                    {{ event.attendance_count }}
+                </div>
+
+                <div class="analytics-metric-sub">
+                    Attendance recorded
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REMAINING -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="analytics-metric">
+
+                <div class="analytics-metric-icon amber">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div class="analytics-metric-label">
+                    REMAINING
+                </div>
+
+                <div class="analytics-metric-value">
+                    {{ remaining }}
+                </div>
+
+                <div class="analytics-metric-sub">
+                    Yet to check in
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ATTENDANCE RATE -->
+
+        <div class="col-6 col-xl-3">
+
+            <div class="analytics-metric">
+
+                <div class="analytics-metric-icon coral">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+
+                <div class="analytics-metric-label">
+                    ATTENDANCE RATE
+                </div>
+
+                <div class="analytics-metric-value">
+                    {{ attendance_rate|round(1) }}%
+                </div>
+
+                <div class="analytics-metric-sub">
+                    Of registered students
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CHARTS
+    ====================================================== -->
+
+    <div class="row g-4">
+
+
+        <!-- ATTENDANCE OVERVIEW -->
+
+        <div class="col-lg-5">
+
+            <div class="cardx analytics-chart-card">
+
+                <div class="analytics-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            ATTENDANCE
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Check-in overview
+                        </h4>
+
+                    </div>
+
+                    <div class="analytics-chart-icon teal">
+                        <i class="bi bi-pie-chart"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-doughnut-wrap">
+
+                    <canvas id="attendanceChart"></canvas>
+
+                    <div class="analytics-doughnut-center">
+
+                        <strong>
+                            {{ attendance_rate|round(1) }}%
+                        </strong>
+
+                        <span>
+                            attended
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-legend">
+
+                    <div class="analytics-legend-item">
+
+                        <span class="analytics-legend-dot teal"></span>
+
+                        <div>
+                            <strong>
+                                {{ event.attendance_count }}
+                            </strong>
+
+                            <span>
+                                Checked in
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="analytics-legend-item">
+
+                        <span class="analytics-legend-dot muted-dot"></span>
+
+                        <div>
+                            <strong>
+                                {{ remaining }}
+                            </strong>
+
+                            <span>
+                                Remaining
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- DEPARTMENT CHART -->
+
+        <div class="col-lg-7">
+
+            <div class="cardx analytics-chart-card">
+
+                <div class="analytics-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            PARTICIPATION
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Department participation
+                        </h4>
+
+                    </div>
+
+                    <div class="analytics-chart-icon purple">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+
+                </div>
+
+
+                {% if dept_data %}
+
+                    <div class="analytics-bar-chart">
+                        <canvas id="deptChart"></canvas>
+                    </div>
+
+                {% else %}
+
+                    <div class="analytics-no-data">
+
+                        <div class="analytics-no-data-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+
+                        <div class="fw-bold mt-3">
+                            No department data
+                        </div>
+
+                        <div class="muted small mt-1">
+                            Participation data will appear here as students register.
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CAPACITY + EVENT INFO
+    ====================================================== -->
+
+    <div class="row g-4 mt-1">
+
+
+        <!-- CAPACITY -->
+
+        <div class="col-lg-6">
+
+            <div class="cardx p-4 analytics-info-card">
+
+                <div class="analytics-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            CAPACITY
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            Registration capacity
+                        </h4>
+
+                    </div>
+
+                    <div class="analytics-chart-icon amber">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-capacity-number">
+                    {{ event.progress_percent }}%
+                </div>
+
+
+                <div class="progress analytics-progress">
+
+                    <div
+                        class="progress-bar"
+                        style="width:{{ event.progress_percent }}%"
+                    ></div>
+
+                </div>
+
+
+                <div class="analytics-capacity-row">
+
+                    <div>
+
+                        <strong>
+                            {{ event.active_registrations }}
+                        </strong>
+
+                        <span>
+                            registered
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{ event.max_participants }}
+                        </strong>
+
+                        <span>
+                            maximum
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{ event.waitlist_count }}
+                        </strong>
+
+                        <span>
+                            waitlisted
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EVENT SUMMARY -->
+
+        <div class="col-lg-6">
+
+            <div class="cardx p-4 analytics-info-card">
+
+                <div class="analytics-panel-head">
+
+                    <div>
+
+                        <div class="muted small fw-bold">
+                            EVENT SUMMARY
+                        </div>
+
+                        <h4 class="mb-0 mt-1">
+                            At a glance
+                        </h4>
+
+                    </div>
+
+                    <div class="analytics-chart-icon coral">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-summary-list">
+
+
+                    <div class="analytics-summary-row">
+
+                        <span>
+                            <i class="bi bi-calendar3"></i>
+                            Date
+                        </span>
+
+                        <strong>
+                            {{ event.start_datetime.strftime('%d %b %Y') }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="analytics-summary-row">
+
+                        <span>
+                            <i class="bi bi-clock"></i>
+                            Duration
+                        </span>
+
+                        <strong>
+                            {{ event.start_datetime.strftime('%I:%M %p') }}
+                            –
+                            {{ event.end_datetime.strftime('%I:%M %p') }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="analytics-summary-row">
+
+                        <span>
+                            <i class="bi bi-geo-alt"></i>
+                            Venue
+                        </span>
+
+                        <strong>
+                            {{ event.venue.name }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="analytics-summary-row">
+
+                        <span>
+                            <i class="bi bi-grid"></i>
+                            Category
+                        </span>
+
+                        <strong>
+                            {{ event.category }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="analytics-summary-row">
+
+                        <span>
+                            <i class="bi bi-person-badge"></i>
+                            Event type
+                        </span>
+
+                        <strong>
+                            {{ event.event_type }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FEEDBACK
+    ====================================================== -->
+
+    <div class="cardx p-4 mt-4">
+
+        <div class="analytics-panel-head">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    FEEDBACK
+                </div>
+
+                <h4 class="mb-0 mt-1">
+                    Feedback snapshot
+                </h4>
+
+            </div>
+
+
+            <span class="badge-soft">
+                {{ feedback|length }}
+                response{{ 's' if feedback|length != 1 else '' }}
+            </span>
+
+        </div>
+
+
+        {% if feedback %}
+
+            <div class="row g-3 mt-1">
+
+                {% for label, values in [
+                    ('Overall', feedback|map(attribute='rating')|list),
+                    ('Speaker', feedback|map(attribute='speaker_rating')|list),
+                    ('Organization', feedback|map(attribute='organization_rating')|list),
+                    ('Venue', feedback|map(attribute='venue_rating')|list)
+                ] %}
+
+                    <div class="col-6 col-xl-3">
+
+                        <div class="feedback-stat-card">
+
+                            <div class="feedback-stat-label">
+                                {{ label }}
+                            </div>
+
+
+                            <div class="feedback-stat-value">
+
+                                {{ (
+                                    values|sum / values|length
+                                )|round(1) if values|length else '—' }}
+
+                            </div>
+
+
+                            <div class="feedback-stat-stars">
+                                {% set rating =
+                                    (values|sum / values|length)|round(0)|int
+                                    if values|length else 0
+                                %}
+
+                                {% for i in range(1, 6) %}
+
+                                    {% if i <= rating %}
+                                        <i class="bi bi-star-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-star"></i>
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            <div class="muted small mt-1">
+                                out of 5
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            <div class="analytics-no-feedback">
+
+                <div class="analytics-no-feedback-icon">
+                    <i class="bi bi-chat-left-text"></i>
+                </div>
+
+                <div>
+
+                    <div class="fw-bold">
+                        No feedback received yet
+                    </div>
+
+                    <div class="muted small mt-1">
+                        Feedback will appear here after attendees submit their responses.
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const styles =
+        getComputedStyle(document.documentElement);
+
+
+    const textColor =
+        styles.getPropertyValue("--text").trim();
+
+    const mutedColor =
+        styles.getPropertyValue("--muted").trim();
+
+    const borderColor =
+        styles.getPropertyValue("--border").trim();
+
+    const surfaceColor =
+        styles.getPropertyValue("--surface").trim();
+
+    const brandColor =
+        styles.getPropertyValue("--brand").trim();
+
+    const tealColor =
+        styles.getPropertyValue("--teal").trim();
+
+
+    /* =====================================================
+       ATTENDANCE DOUGHNUT
+    ===================================================== */
+
+    const attendanceCanvas =
+        document.getElementById("attendanceChart");
+
+
+    if (attendanceCanvas) {
+
+        const attendance =
+            {{ event.attendance_count }};
+
+        const remaining =
+            {{ remaining }};
+
+
+        new Chart(
+            attendanceCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+                    labels: [
+                        "Checked in",
+                        "Remaining"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                attendance,
+                                remaining
+                            ],
+
+                            backgroundColor: [
+                                tealColor,
+                                borderColor
+                            ],
+
+                            borderWidth: 0,
+
+                            hoverOffset: 6
+                        }
+                    ]
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: "72%",
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label: (context) => {
+
+                                    const value =
+                                        context.raw;
+
+                                    return ` ${value} student${value === 1 ? "" : "s"}`;
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                }
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       DEPARTMENT BAR CHART
+    ===================================================== */
+
+    const departmentCanvas =
+        document.getElementById("deptChart");
+
+
+    {% if dept_data %}
+
+    if (departmentCanvas) {
+
+        const labels =
+            {{ dept_data.keys()|list|tojson }};
+
+        const values =
+            {{ dept_data.values()|list|tojson }};
+
+
+        new Chart(
+            departmentCanvas,
+            {
+                type: "bar",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Registrations",
+
+                            data: values,
+
+                            backgroundColor: brandColor,
+
+                            borderRadius: 8,
+
+                            borderSkipped: false,
+
+                            maxBarThickness: 42
+
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label: (context) => {
+
+                                    const value =
+                                        context.raw;
+
+                                    return ` ${value} registration${value === 1 ? "" : "s"}`;
+
+                                }
+
+                            }
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        x: {
+
+                            grid: {
+                                display: false
+                            },
+
+                            border: {
+                                display: false
+                            },
+
+                            ticks: {
+                                color: mutedColor,
+                                font: {
+                                    size: 10,
+                                    weight: "600"
+                                }
+                            }
+
+                        },
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+
+                                precision: 0,
+
+                                color: mutedColor,
+
+                                font: {
+                                    size: 10
+                                }
+
+                            },
+
+                            grid: {
+                                color: borderColor
+                            },
+
+                            border: {
+                                display: false
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+    {% endif %}
+
+});
+
+</script>
+
+{% endblock %}

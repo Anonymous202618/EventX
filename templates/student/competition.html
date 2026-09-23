@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+
+{% block title %}Competition{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(139,124,255,.12);color:var(--brand2);">
+                    COMPETITION
+                </span>
+
+                <span class="small muted">
+                    Student workspace
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ competition.event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Create your team and manage your competition members.
+            </p>
+
+        </div>
+
+
+        <!-- Competition actions -->
+        <div class="d-flex flex-wrap gap-2">
+
+            <a
+                href="{{ url_for('student_event_leaderboard', event_id=event.id) }}"
+                class="btn btn-brand"
+            >
+                <i class="bi bi-trophy me-1"></i>
+                Leaderboard
+            </a>
+
+            <a
+                href="{{ url_for('event_detail', event_id=event.id) }}"
+                class="btn btn-ghost"
+            >
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Event
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Competition summary -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Competition
+                </div>
+
+                <div class="fw-bold">
+                    {{ competition.status|title }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    Teams
+                </div>
+
+                <div class="fw-bold fs-4">
+                    {{ teams|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-md-4">
+
+            <div class="cardx p-4 h-100">
+
+                <div class="small muted mb-2">
+                    My status
+                </div>
+
+                <div class="fw-bold">
+
+                    {% if my_team %}
+                        Team member
+                    {% else %}
+                        No team
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- My team -->
+        <div class="col-xl-7">
+
+            {% if my_team %}
+
+            <div class="cardx p-4 p-lg-5 mb-4">
+
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+
+                    <div>
+
+                        <div class="small fw-bold muted mb-1">
+                            MY TEAM
+                        </div>
+
+                        <h3 class="mb-1">
+                            {{ my_team.name }}
+                        </h3>
+
+                        <p class="muted small mb-0">
+                            Captain: {{ my_team.captain.name }}
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="rounded-4 px-3 py-2"
+                        style="background:rgba(139,124,255,.12);color:var(--brand2);"
+                    >
+
+                        <span class="fw-bold">
+                            {{ my_team.points|round(1) }}
+                        </span>
+
+                        <span class="small">
+                            points
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="small fw-bold muted mb-3">
+                    TEAM MEMBERS
+                </div>
+
+
+                <div class="stack">
+
+                    {% for member in my_team.members %}
+
+                    <div
+                        class="rounded-4 p-3"
+                        style="background:var(--surface2);border:1px solid var(--border);"
+                    >
+
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div
+                                    class="rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:42px;height:42px;background:rgba(20,184,166,.10);color:var(--teal);"
+                                >
+
+                                    <span class="fw-bold">
+                                        {{ member.student.name[:1]|upper }}
+                                    </span>
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="fw-semibold">
+                                        {{ member.student.name }}
+                                    </div>
+
+                                    <div class="small muted">
+                                        {{ member.student.email }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {% if member.student_id == my_team.captain_id %}
+
+                                <span
+                                    class="badge rounded-pill"
+                                    style="background:rgba(245,158,11,.12);color:var(--amber);"
+                                >
+                                    Captain
+                                </span>
+
+                            {% elif my_team.captain_id == current_user.id %}
+
+                                <form
+                                    method="post"
+                                    onsubmit="return confirm('Remove this member from the team?');"
+                                >
+
+                                    <input
+                                        type="hidden"
+                                        name="action"
+                                        value="remove_member"
+                                    >
+
+                                    <input
+                                        type="hidden"
+                                        name="member_id"
+                                        value="{{ member.id }}"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-ghost"
+                                        title="Remove member"
+                                    >
+
+                                        <i class="bi bi-person-dash"></i>
+
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            {% if my_team.captain_id == current_user.id %}
+
+            <!-- Add member -->
+            <div class="cardx p-4 p-lg-5">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div
+                        class="rounded-3 d-flex align-items-center justify-content-center"
+                        style="width:44px;height:44px;background:rgba(20,184,166,.10);color:var(--teal);"
+                    >
+
+                        <i class="bi bi-person-plus fs-5"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="small fw-bold muted">
+                            TEAM MANAGEMENT
+                        </div>
+
+                        <h4 class="mb-0">
+                            Add a member
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <p class="muted small mb-4">
+                    The student must already be registered for this event.
+                </p>
+
+
+                <form method="post">
+
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="add_member"
+                    >
+
+
+                    <label
+                        class="form-label fw-semibold"
+                        for="memberEmail"
+                    >
+                        Student email
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <span
+                            class="input-group-text"
+                            style="background:var(--surface2);border-color:var(--border);color:var(--brand);"
+                        >
+                            <i class="bi bi-envelope"></i>
+                        </span>
+
+                        <input
+                            type="email"
+                            id="memberEmail"
+                            class="form-control"
+                            name="member_email"
+                            placeholder="student@example.com"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-brand"
+                        >
+
+                            <i class="bi bi-person-plus me-1"></i>
+                            Add Member
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            {% endif %}
+
+
+            {% else %}
+
+            <!-- Create team -->
+            <div class="cardx p-4 p-lg-5">
+
+                <div class="text-center py-3">
+
+                    <div
+                        class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                        style="width:76px;height:76px;background:rgba(139,124,255,.12);color:var(--brand2);"
+                    >
+
+                        <i class="bi bi-people fs-2"></i>
+
+                    </div>
+
+                    <div class="small fw-bold muted mb-2">
+                        TEAM REGISTRATION
+                    </div>
+
+                    <h3 class="mb-2">
+                        Create your competition team
+                    </h3>
+
+                    <p
+                        class="muted mx-auto mb-4"
+                        style="max-width:620px;line-height:1.7;"
+                    >
+                        Create a team for this competition. You will automatically
+                        become the captain and can add other registered students.
+                    </p>
+
+
+                    <form
+                        method="post"
+                        class="mx-auto"
+                        style="max-width:500px;"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="action"
+                            value="create_team"
+                        >
+
+
+                        <label
+                            class="form-label fw-semibold text-start d-block"
+                            for="teamName"
+                        >
+                            Team name
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="teamName"
+                            name="team_name"
+                            class="form-control form-control-lg mb-3"
+                            placeholder="e.g. Team Alpha"
+                            maxlength="120"
+                            required
+                        >
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-brand btn-lg w-100"
+                        >
+
+                            <i class="bi bi-people me-2"></i>
+                            Create Team
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Teams -->
+        <div class="col-xl-5">
+
+            <div class="cardx overflow-hidden">
+
+                <div
+                    class="p-4"
+                    style="border-bottom:1px solid var(--border);"
+                >
+
+                    <div class="small fw-bold muted mb-1">
+                        REGISTERED TEAMS
+                    </div>
+
+                    <h4 class="mb-1">
+                        Competition teams
+                    </h4>
+
+                    <p class="muted small mb-0">
+                        Teams currently registered for this competition.
+                    </p>
+
+                </div>
+
+
+                <div class="p-3">
+
+                    <div class="stack">
+
+                        {% for team in teams %}
+
+                        <div
+                            class="rounded-4 p-4"
+                            style="background:var(--surface2);border:1px solid var(--border);"
+                        >
+
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+
+                                <div>
+
+                                    <div class="fw-bold">
+                                        {{ team.name }}
+                                    </div>
+
+                                    <div class="small muted mt-1">
+                                        Captain: {{ team.captain.name }}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="text-end">
+
+                                    <div
+                                        class="fw-bold"
+                                        style="color:var(--brand);"
+                                    >
+                                        {{ team.points|round(1) }}
+                                    </div>
+
+                                    <div class="small muted">
+                                        points
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="small muted mt-3">
+
+                                <i class="bi bi-people me-1"></i>
+
+                                {{ team.members|length }}
+
+                                member{% if team.members|length != 1 %}s{% endif %}
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="text-center p-5">
+
+                            <div
+                                class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width:64px;height:64px;background:var(--surface2);color:var(--muted);"
+                            >
+
+                                <i class="bi bi-people fs-4"></i>
+
+                            </div>
+
+                            <h5 class="mb-2">
+                                No teams yet
+                            </h5>
+
+                            <p class="muted small mb-0">
+                                Be the first team to register.
+                            </p>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

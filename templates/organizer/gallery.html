@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Gallery{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="badge rounded-pill px-3 py-2"
+                      style="background:rgba(255,107,107,.10);color:var(--coral);">
+                    EVENT GALLERY
+                </span>
+
+                <span class="small muted">
+                    Organizer media
+                </span>
+
+            </div>
+
+            <h1 class="page-title mb-2">
+                {{ event.title }}
+            </h1>
+
+            <p class="muted mb-0">
+                Upload and manage photos from this event.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('organizer_events') }}"
+            class="btn btn-ghost"
+        >
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Events
+        </a>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- Upload -->
+        <div class="col-xl-4">
+
+            <div class="cardx p-4 p-lg-5">
+
+                <div class="d-flex align-items-center gap-3 mb-4">
+
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                        <i class="bi bi-cloud-arrow-up fs-5"></i>
+
+                    </div>
+
+                    <div>
+
+                        <div class="small fw-bold muted">
+                            ADD PHOTOS
+                        </div>
+
+                        <h4 class="mb-0">
+                            Upload to gallery
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    id="galleryForm"
+                >
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Images
+                        </label>
+
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="galleryImages"
+                            name="images"
+                            accept="image/*"
+                            multiple
+                            required
+                        >
+
+                        <div class="form-text muted">
+                            You can select multiple images at once.
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="galleryCaption"
+                            class="form-label fw-semibold"
+                        >
+                            Caption
+                        </label>
+
+                        <textarea
+                            id="galleryCaption"
+                            name="caption"
+                            class="form-control"
+                            rows="4"
+                            maxlength="255"
+                            placeholder="e.g. Highlights from the closing ceremony..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand w-100 py-3"
+                        id="uploadGalleryButton"
+                    >
+
+                        <i class="bi bi-cloud-upload me-2"></i>
+                        Upload Photos
+
+                    </button>
+
+                </form>
+
+
+                <div class="d-flex gap-2 align-items-start mt-4 pt-4"
+                     style="border-top:1px solid var(--border);">
+
+                    <i class="bi bi-info-circle mt-1"
+                       style="color:var(--brand);"></i>
+
+                    <div class="small muted">
+                        Upload clear event photos. They can later be displayed to students from the event page.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Gallery -->
+        <div class="col-xl-8">
+
+            <div class="cardx overflow-hidden">
+
+                <div class="p-4 p-lg-5"
+                     style="border-bottom:1px solid var(--border);">
+
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        <div>
+
+                            <div class="small fw-bold muted mb-1">
+                                PHOTO LIBRARY
+                            </div>
+
+                            <h4 class="mb-1">
+                                Event photos
+                            </h4>
+
+                            <p class="muted small mb-0">
+                                {{ gallery|length }} image{% if gallery|length != 1 %}s{% endif %} in this gallery.
+                            </p>
+
+                        </div>
+
+                        <div class="rounded-3 d-flex align-items-center justify-content-center"
+                             style="width:44px;height:44px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                            <i class="bi bi-images fs-5"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="p-3 p-lg-4">
+
+                    <div class="row g-3">
+
+                        {% for image in gallery %}
+
+                        <div class="col-md-6">
+
+                            <div class="rounded-4 overflow-hidden h-100"
+                                 style="background:var(--surface2);border:1px solid var(--border);">
+
+                                <div style="aspect-ratio:16/10;background:var(--surface2);">
+
+                                    <img
+                                        src="{{ url_for('static', filename=image.image_path) }}"
+                                        alt="{{ image.caption or event.title }}"
+                                        loading="lazy"
+                                        style="width:100%;height:100%;object-fit:cover;"
+                                    >
+
+                                </div>
+
+
+                                <div class="p-3">
+
+                                    {% if image.caption %}
+
+                                    <div class="small"
+                                         style="line-height:1.6;">
+                                        {{ image.caption }}
+                                    </div>
+
+                                    {% else %}
+
+                                    <div class="small muted">
+                                        No caption
+                                    </div>
+
+                                    {% endif %}
+
+
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+
+                                        <div class="small muted">
+                                            {{ image.created_at.strftime('%d %b %Y') }}
+                                        </div>
+
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for('delete_gallery_image', gallery_id=image.id) }}"
+                                            onsubmit="return confirm('Delete this gallery image?');"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-ghost"
+                                                title="Delete image"
+                                            >
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="col-12">
+
+                            <div class="text-center p-5">
+
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                     style="width:72px;height:72px;background:rgba(255,107,107,.10);color:var(--coral);">
+
+                                    <i class="bi bi-images fs-2"></i>
+
+                                </div>
+
+                                <h5 class="mb-2">
+                                    Gallery is empty
+                                </h5>
+
+                                <p class="muted mb-0">
+                                    Upload your first event photos using the form.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form =
+        document.getElementById("galleryForm");
+
+    const input =
+        document.getElementById("galleryImages");
+
+    const button =
+        document.getElementById("uploadGalleryButton");
+
+
+    if (!form || !button) {
+        return;
+    }
+
+
+    form.addEventListener("submit", function () {
+
+        if (!form.checkValidity()) {
+            return;
+        }
+
+        button.disabled = true;
+
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2"
+                  aria-hidden="true"></span>
+            Uploading...
+        `;
+
+    });
+
+
+    if (input) {
+
+        input.addEventListener("change", function () {
+
+            const count =
+                this.files
+                
+                    ? this.files.length
+                    : 0;
+
+            if (count > 0) {
+
+                button.innerHTML = `
+                    <i class="bi bi-cloud-upload me-2"></i>
+                    Upload ${count} Photo${count === 1 ? "" : "s"}
+                `;
+
+            } else {
+
+                button.innerHTML = `
+                    <i class="bi bi-cloud-upload me-2"></i>
+                    Upload Photos
+                `;
+
+            }
+
+        });
+
+    }
+
+});
+</script>
+
+{% endblock %}

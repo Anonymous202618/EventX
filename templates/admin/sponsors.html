@@ -1,0 +1,897 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Sponsorship Management
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+    .sponsor-page {
+        max-width: 1250px;
+        margin: 0 auto;
+    }
+
+
+    .sponsor-header {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 28px;
+        margin-bottom: 22px;
+    }
+
+
+    .sponsor-eyebrow {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+
+
+    .sponsor-header h1 {
+        color: var(--text);
+        font-size: 30px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+
+    .sponsor-header p {
+        color: var(--muted);
+        margin: 7px 0 0;
+    }
+
+
+    .sponsor-grid {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+
+    .sponsor-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+
+    .sponsor-card-header {
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--border);
+    }
+
+
+    .sponsor-card-header h2 {
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+
+    .sponsor-card-header p {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 5px 0 0;
+    }
+
+
+    .sponsor-form {
+        padding: 20px 22px;
+    }
+
+
+    .form-label {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+
+    .sponsor-form .form-control,
+    .sponsor-form .form-select,
+    .sponsor-form textarea {
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 11px;
+    }
+
+
+    .sponsor-form .form-control::placeholder,
+    .sponsor-form textarea::placeholder {
+        color: var(--muted) !important;
+        opacity: 0.9;
+    }
+
+
+    .sponsor-form .form-control:focus,
+    .sponsor-form .form-select:focus,
+    .sponsor-form textarea:focus {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13) !important;
+    }
+
+
+    .sponsor-form textarea {
+        min-height: 105px;
+        resize: vertical;
+    }
+
+
+    .btn-add-sponsor {
+        width: 100%;
+        border: 0;
+        border-radius: 11px;
+        padding: 12px 16px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #7c3aed, #9333ea);
+    }
+
+
+    .btn-add-sponsor:hover {
+        color: #fff;
+        opacity: 0.94;
+    }
+
+
+    .sponsor-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 16px 22px;
+        border-bottom: 1px solid var(--border);
+    }
+
+
+    .sponsor-stat {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        padding: 12px;
+        text-align: center;
+    }
+
+
+    .sponsor-stat-value {
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+
+    .sponsor-stat-label {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        margin-top: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+
+    .sponsor-list {
+        padding: 8px 12px 14px;
+    }
+
+
+    .sponsor-item {
+        padding: 18px 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+
+    .sponsor-item:last-child {
+        border-bottom: 0;
+    }
+
+
+    .sponsor-item-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+
+    .sponsor-name {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+
+    .sponsor-event {
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+
+    .sponsor-event i {
+        margin-right: 4px;
+    }
+
+
+    .sponsor-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+
+    .status-prospective {
+        color: #b45309;
+        background: rgba(245, 158, 11, 0.13);
+    }
+
+
+    .status-contacted {
+        color: #2563eb;
+        background: rgba(59, 130, 246, 0.13);
+    }
+
+
+    .status-confirmed {
+        color: #15803d;
+        background: rgba(34, 197, 94, 0.13);
+    }
+
+
+    .status-declined {
+        color: #dc2626;
+        background: rgba(239, 68, 68, 0.12);
+    }
+
+
+    .sponsor-details {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 15px;
+    }
+
+
+    .sponsor-detail-box {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+
+    .sponsor-detail-label {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+
+    .sponsor-detail-value {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+
+    .sponsor-benefits {
+        margin-top: 12px;
+        padding: 12px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+    }
+
+
+    .sponsor-benefits-text {
+        color: var(--text);
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-line;
+    }
+
+
+    .sponsor-item-bottom {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+
+
+    .delete-sponsor-btn {
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--muted);
+        border-radius: 10px;
+        padding: 8px 11px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+
+    .delete-sponsor-btn:hover {
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.4);
+    }
+
+
+    .empty-sponsors {
+        padding: 55px 25px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+
+    .empty-sponsors-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 17px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        font-size: 25px;
+    }
+
+
+    .empty-sponsors h3 {
+        color: var(--text);
+        font-size: 17px;
+        margin-bottom: 7px;
+    }
+
+
+    .info-box {
+        margin-top: 18px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: 13px;
+    }
+
+
+    .info-box-title {
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+
+    .info-box-text {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+
+    @media (max-width: 900px) {
+
+        .sponsor-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+
+    @media (max-width: 600px) {
+
+        .sponsor-header {
+            padding: 21px;
+        }
+
+        .sponsor-header h1 {
+            font-size: 25px;
+        }
+
+        .sponsor-details {
+            grid-template-columns: 1fr;
+        }
+
+        .sponsor-item-top {
+            flex-direction: column;
+        }
+
+        .sponsor-stat-row {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+
+
+<div class="container py-4">
+
+    <div class="sponsor-page">
+
+
+        <!-- HEADER -->
+
+        <div class="sponsor-header">
+
+            <div class="sponsor-eyebrow">
+                Admin & Operations
+            </div>
+
+            <h1>
+                Sponsorship Management
+            </h1>
+
+            <p>
+                Manage sponsors, contributions, contacts, promised benefits and sponsorship status.
+            </p>
+
+        </div>
+
+
+        <div class="sponsor-grid">
+
+
+            <!-- ADD SPONSOR -->
+
+            <div>
+
+                <div class="sponsor-card">
+
+                    <div class="sponsor-card-header">
+
+                        <h2>
+                            Add Sponsor
+                        </h2>
+
+                        <p>
+                            Create a sponsorship record for an event.
+                        </p>
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+                        class="sponsor-form"
+                    >
+
+
+                        <!-- EVENT -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="eventId"
+                                class="form-label"
+                            >
+                                Event
+                            </label>
+
+                            <select
+                                id="eventId"
+                                name="event_id"
+                                class="form-select"
+                                required
+                            >
+
+                                <option value="">
+                                    Select event
+                                </option>
+
+                                {% for event in events %}
+
+                                    <option value="{{ event.id }}">
+                                        {{ event.title }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- SPONSOR NAME -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="sponsorName"
+                                class="form-label"
+                            >
+                                Sponsor Name
+                            </label>
+
+                            <input
+                                id="sponsorName"
+                                type="text"
+                                name="name"
+                                class="form-control"
+                                maxlength="180"
+                                placeholder="e.g. TechNova Solutions"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- CONTRIBUTION -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="contribution"
+                                class="form-label"
+                            >
+                                Contribution Amount
+                            </label>
+
+                            <input
+                                id="contribution"
+                                type="number"
+                                name="contribution"
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 25000"
+                                value="0"
+                            >
+
+                        </div>
+
+
+                        <!-- CONTACT -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="contact"
+                                class="form-label"
+                            >
+                                Contact
+                            </label>
+
+                            <input
+                                id="contact"
+                                type="text"
+                                name="contact"
+                                class="form-control"
+                                maxlength="180"
+                                placeholder="Phone or email"
+                            >
+
+                        </div>
+
+
+                        <!-- BENEFITS -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="promisedBenefits"
+                                class="form-label"
+                            >
+                                Promised Benefits
+                            </label>
+
+                            <textarea
+                                id="promisedBenefits"
+                                name="promised_benefits"
+                                class="form-control"
+                                placeholder="e.g. Logo placement, social media mention, banner at venue..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="sponsorStatus"
+                                class="form-label"
+                            >
+                                Status
+                            </label>
+
+                            <select
+                                id="sponsorStatus"
+                                name="status"
+                                class="form-select"
+                            >
+
+                                <option value="Prospective">
+                                    Prospective
+                                </option>
+
+                                <option value="Contacted">
+                                    Contacted
+                                </option>
+
+                                <option value="Confirmed">
+                                    Confirmed
+                                </option>
+
+                                <option value="Declined">
+                                    Declined
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-add-sponsor"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Add Sponsor
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-box-title">
+                        Sponsorship workflow
+                    </div>
+
+                    <div class="info-box-text">
+                        Add the sponsor, record the expected contribution and contact,
+                        then update the sponsorship status as discussions progress.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SPONSOR LIST -->
+
+            <div class="sponsor-card">
+
+                <div class="sponsor-card-header">
+
+                    <h2>
+                        Sponsor Records
+                    </h2>
+
+                    <p>
+                        All sponsorship records across your events.
+                    </p>
+
+                </div>
+
+
+                {% set confirmed_count = sponsors|selectattr("status", "equalto", "Confirmed")|list|length %}
+                {% set prospective_count = sponsors|selectattr("status", "equalto", "Prospective")|list|length %}
+                {% set total_contribution = sponsors|sum(attribute="contribution") %}
+
+
+                <div class="sponsor-stat-row">
+
+                    <div class="sponsor-stat">
+
+                        <div class="sponsor-stat-value">
+                            {{ sponsors|length }}
+                        </div>
+
+                        <div class="sponsor-stat-label">
+                            Sponsors
+                        </div>
+
+                    </div>
+
+
+                    <div class="sponsor-stat">
+
+                        <div class="sponsor-stat-value">
+                            {{ confirmed_count }}
+                        </div>
+
+                        <div class="sponsor-stat-label">
+                            Confirmed
+                        </div>
+
+                    </div>
+
+
+                    <div class="sponsor-stat">
+
+                        <div class="sponsor-stat-value">
+                            ₹{{ "{:,.0f}".format(total_contribution or 0) }}
+                        </div>
+
+                        <div class="sponsor-stat-label">
+                            Contributions
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="sponsor-list">
+
+
+                    {% if sponsors %}
+
+
+                        {% for sponsor in sponsors %}
+
+                            <div class="sponsor-item">
+
+
+                                <div class="sponsor-item-top">
+
+                                    <div>
+
+                                        <div class="sponsor-name">
+                                            {{ sponsor.name }}
+                                        </div>
+
+                                        <div class="sponsor-event">
+
+                                            <i class="bi bi-calendar-event"></i>
+
+                                            {{ sponsor.event.title if sponsor.event else "Event unavailable" }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <span
+                                        class="sponsor-status
+                                        {% if sponsor.status == 'Prospective' %}
+                                            status-prospective
+                                        {% elif sponsor.status == 'Contacted' %}
+                                            status-contacted
+                                        {% elif sponsor.status == 'Confirmed' %}
+                                            status-confirmed
+                                        {% elif sponsor.status == 'Declined' %}
+                                            status-declined
+                                        {% endif %}"
+                                    >
+                                        {{ sponsor.status }}
+                                    </span>
+
+                                </div>
+
+
+                                <div class="sponsor-details">
+
+
+                                    <div class="sponsor-detail-box">
+
+                                        <div class="sponsor-detail-label">
+                                            Contribution
+                                        </div>
+
+                                        <div class="sponsor-detail-value">
+                                            ₹{{ "{:,.2f}".format(sponsor.contribution or 0) }}
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="sponsor-detail-box">
+
+                                        <div class="sponsor-detail-label">
+                                            Contact
+                                        </div>
+
+                                        <div class="sponsor-detail-value">
+
+                                            {% if sponsor.contact %}
+                                                {{ sponsor.contact }}
+                                            {% else %}
+                                                Not provided
+                                            {% endif %}
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+
+                                {% if sponsor.promised_benefits %}
+
+                                    <div class="sponsor-benefits">
+
+                                        <div class="sponsor-detail-label">
+                                            Promised Benefits
+                                        </div>
+
+                                        <div class="sponsor-benefits-text">
+                                            {{ sponsor.promised_benefits }}
+                                        </div>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div class="sponsor-item-bottom">
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('delete_sponsor', sponsor_id=sponsor.id) }}"
+                                        onsubmit="return confirm('Delete this sponsor record?');"
+                                    >
+
+                                        <button
+                                            type="submit"
+                                            class="delete-sponsor-btn"
+                                        >
+                                            <i class="bi bi-trash3 me-1"></i>
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+
+                            </div>
+
+                        {% endfor %}
+
+
+                    {% else %}
+
+                        <div class="empty-sponsors">
+
+                            <div class="empty-sponsors-icon">
+                                <i class="bi bi-building-check"></i>
+                            </div>
+
+                            <h3>
+                                No sponsors yet
+                            </h3>
+
+                            <p class="mb-0">
+                                Add your first sponsor using the form.
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

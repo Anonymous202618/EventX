@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block title %}Resource Management{% endblock %}
+
+{% block content %}
+
+<div class="container py-4 py-lg-5">
+
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+
+        <div>
+
+            <span class="badge rounded-pill px-3 py-2 mb-2"
+                  style="background:rgba(139,124,255,.12);color:var(--brand2);">
+                ADMIN OPERATIONS
+            </span>
+
+            <h1 class="page-title mb-2">
+                Resource Management
+            </h1>
+
+            <p class="muted mb-0">
+                Manage equipment inventory available to college events.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('admin_resource_requests') }}"
+            class="btn btn-brand"
+        >
+            <i class="bi bi-inbox me-1"></i>
+            Resource Requests
+            {% if pending_count %}
+            <span class="badge ms-1"
+                  style="background:rgba(255,255,255,.18);">
+                {{ pending_count }}
+            </span>
+            {% endif %}
+        </a>
+
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="cardx p-4">
+
+                <div class="small muted mb-1">
+                    RESOURCE TYPES
+                </div>
+
+                <div class="fs-3 fw-bold">
+                    {{ resources|length }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="cardx p-4">
+
+                <div class="small muted mb-1">
+                    TOTAL UNITS
+                </div>
+
+                <div class="fs-3 fw-bold">
+                    {{ resources|sum(attribute='quantity') }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="cardx p-4">
+
+                <div class="small muted mb-1">
+                    PENDING REQUESTS
+                </div>
+
+                <div class="fs-3 fw-bold"
+                     style="color:var(--amber);">
+                    {{ pending_count }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="cardx p-4 p-lg-5 mb-4">
+
+        <div class="small fw-bold muted mb-1">
+            INVENTORY
+        </div>
+
+        <h3 class="mb-2">
+            Add a resource
+        </h3>
+
+        <p class="muted mb-4">
+            Add equipment that organizers can request for their events.
+        </p>
+
+
+        <form
+            method="post"
+            class="row g-3"
+        >
+
+            <div class="col-lg-4">
+
+                <label class="form-label fw-semibold">
+                    Resource name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    placeholder="Projector"
+                    maxlength="120"
+                    required
+                >
+
+            </div>
+
+
+            <div class="col-lg-3">
+
+                <label class="form-label fw-semibold">
+                    Quantity
+                </label>
+
+                <input
+                    type="number"
+                    name="quantity"
+                    class="form-control"
+                    min="1"
+                    value="1"
+                    required
+                >
+
+            </div>
+
+
+            <div class="col-lg-5">
+
+                <label class="form-label fw-semibold">
+                    Description
+                </label>
+
+                <input
+                    type="text"
+                    name="description"
+                    class="form-control"
+                    maxlength="255"
+                    placeholder="HD projector with HDMI input"
+                >
+
+            </div>
+
+
+            <div class="col-12">
+
+                <button class="btn btn-brand">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Add Resource
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <div class="cardx overflow-hidden">
+
+        <div class="p-4"
+             style="border-bottom:1px solid var(--border);">
+
+            <div class="small fw-bold muted mb-1">
+                RESOURCE INVENTORY
+            </div>
+
+            <h4 class="mb-0">
+                Available equipment
+            </h4>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table mb-0"
+                   id="adminResourcesTable">
+
+                <thead>
+
+                    <tr>
+                        <th>Resource</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for resource in resources %}
+
+                    <tr>
+
+                        <td>
+                            <div class="fw-semibold">
+                                {{ resource.name }}
+                            </div>
+                        </td>
+
+                        <td class="muted">
+                            {{ resource.description or "—" }}
+                        </td>
+
+                        <td>
+
+                            <span class="badge rounded-pill"
+                                  style="background:rgba(20,184,166,.12);color:var(--teal);">
+                                {{ resource.quantity }} units
+                            </span>
+
+                        </td>
+
+                        <td class="text-end">
+
+                            <form
+                                method="post"
+                                action="{{ url_for('delete_resource', resource_id=resource.id) }}"
+                                onsubmit="return confirm('Remove this resource from the inventory?');"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-ghost"
+                                    title="Delete resource"
+                                >
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="4">
+
+                            <div class="text-center p-5">
+
+                                <i class="bi bi-box-seam fs-2 muted"></i>
+
+                                <h5 class="mt-3 mb-2">
+                                    No resources yet
+                                </h5>
+
+                                <p class="muted small mb-0">
+                                    Add your first resource above.
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<style>
+
+#adminResourcesTable {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text);
+    --bs-table-border-color: var(--border);
+    color: var(--text) !important;
+    background: var(--surface) !important;
+}
+
+#adminResourcesTable > :not(caption) > * > * {
+    color: var(--text) !important;
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+#adminResourcesTable thead th {
+    color: var(--muted) !important;
+    background: var(--surface2) !important;
+}
+
+#adminResourcesTable tbody tr:hover td {
+    background: var(--surface2) !important;
+    color: var(--text) !important;
+}
+
+</style>
+
+{% endblock %}

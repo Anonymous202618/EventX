@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    My Events
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid px-4 px-lg-5">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="page-head">
+
+        <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+            <div>
+
+                <div class="muted small fw-bold">
+                    EVENT MANAGEMENT
+                </div>
+
+                <h1 class="page-title mb-2">
+                    Manage your events
+                </h1>
+
+                <p class="muted mb-0">
+                    Monitor registrations, attendance and event operations from one place.
+                </p>
+
+            </div>
+
+
+            <a
+                class="btn btn-brand"
+                href="{{ url_for('create_event') }}"
+            >
+                <i class="bi bi-plus-lg me-1"></i>
+                Create Event
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
+
+    {% set ns = namespace(
+        published=0,
+        submitted=0,
+        total_registered=0,
+        total_attended=0
+    ) %}
+
+
+    {% for event in events %}
+
+        {% if event.status == 'published' %}
+            {% set ns.published = ns.published + 1 %}
+        {% endif %}
+
+        {% if event.status == 'submitted' %}
+            {% set ns.submitted = ns.submitted + 1 %}
+        {% endif %}
+
+        {% set ns.total_registered =
+            ns.total_registered + event.active_registrations
+        %}
+
+        {% set ns.total_attended =
+            ns.total_attended + event.attendance_count
+        %}
+
+    {% endfor %}
+
+
+    <div class="row g-3 mb-4">
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="organizer-event-stat">
+
+                <div class="organizer-event-stat-icon purple">
+                    <i class="bi bi-calendar2-event"></i>
+                </div>
+
+                <div class="organizer-event-stat-value">
+                    {{ events|length }}
+                </div>
+
+                <div class="organizer-event-stat-label">
+                    Total events
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="organizer-event-stat">
+
+                <div class="organizer-event-stat-icon teal">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <div class="organizer-event-stat-value">
+                    {{ ns.published }}
+                </div>
+
+                <div class="organizer-event-stat-label">
+                    Published
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="organizer-event-stat">
+
+                <div class="organizer-event-stat-icon amber">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div class="organizer-event-stat-value">
+                    {{ ns.submitted }}
+                </div>
+
+                <div class="organizer-event-stat-label">
+                    Awaiting approval
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-6 col-xl-3">
+
+            <div class="organizer-event-stat">
+
+                <div class="organizer-event-stat-icon coral">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div class="organizer-event-stat-value">
+                    {{ ns.total_registered }}
+                </div>
+
+                <div class="organizer-event-stat-label">
+                    Total registrations
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EVENT GRID
+    ====================================================== -->
+
+    <div class="organizer-events-grid">
+
+        {% for event in events %}
+
+
+        <article class="organizer-event-card">
+
+
+            <!-- EVENT IMAGE -->
+
+            <div class="organizer-event-image-wrap">
+
+                {% if event.banner %}
+
+                    <img
+                        src="{{ url_for('static', filename=event.banner) }}"
+                        alt="{{ event.title }}"
+                        class="organizer-event-image"
+                    >
+
+                    <div class="organizer-event-image-overlay"></div>
+
+                {% else %}
+
+                    <div class="organizer-event-image-placeholder">
+
+                        <i class="bi bi-calendar2-event"></i>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- STATUS -->
+
+                <div class="organizer-event-status
+                    {% if event.status == 'published' %}
+                        published
+                    {% elif event.status == 'submitted' %}
+                        submitted
+                    {% elif event.status == 'cancelled' %}
+                        cancelled
+                    {% else %}
+                        default
+                    {% endif %}
+                ">
+
+                    {% if event.status == 'published' %}
+
+                        <span class="status-dot"></span>
+
+                    {% elif event.status == 'submitted' %}
+
+                        <i class="bi bi-clock"></i>
+
+                    {% elif event.status == 'cancelled' %}
+
+                        <i class="bi bi-x-circle"></i>
+
+                    {% else %}
+
+                        <i class="bi bi-info-circle"></i>
+
+                    {% endif %}
+
+                    {{ event.status|title }}
+
+                </div>
+
+
+                <div class="organizer-event-category">
+                    {{ event.category }}
+                </div>
+
+            </div>
+
+
+            <!-- CONTENT -->
+
+            <div class="organizer-event-content">
+
+
+                <div class="organizer-event-heading">
+
+                    <div>
+
+                        <h3 class="organizer-event-title">
+                            {{ event.title }}
+                        </h3>
+
+                        <div class="organizer-event-type">
+                            {{ event.event_type }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="organizer-event-heading-icon">
+                        <i class="bi bi-arrow-up-right"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- META -->
+
+                <div class="organizer-event-meta">
+
+                    <div>
+
+                        <i class="bi bi-calendar3"></i>
+
+                        <span>
+                            {{ event.start_datetime.strftime('%d %b %Y') }}
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <i class="bi bi-clock"></i>
+
+                        <span>
+                            {{ event.start_datetime.strftime('%I:%M %p') }}
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <i class="bi bi-geo-alt"></i>
+
+                        <span>
+                            {{ event.venue.name }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CAPACITY -->
+
+                <div class="organizer-event-capacity">
+
+                    <div class="organizer-event-capacity-head">
+
+                        <span>
+                            Registration capacity
+                        </span>
+
+                        <strong>
+                            {{ event.progress_percent }}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress organizer-event-progress">
+
+                        <div
+                            class="progress-bar"
+                            style="width:{{ event.progress_percent }}%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="organizer-event-counts">
+
+                        <span>
+                            <strong>
+                                {{ event.active_registrations }}
+                            </strong>
+                            registered
+                        </span>
+
+
+                        <span>
+                            <strong>
+                                {{ event.attendance_count }}
+                            </strong>
+                            attended
+                        </span>
+
+
+                        <span>
+                            <strong>
+                                {{ event.max_participants }}
+                            </strong>
+                            capacity
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="organizer-event-actions">
+
+                   <a
+                       href="{{ url_for('organizer_event', event_id=event.id) }}"
+                       class="btn btn-brand"
+                  >
+                      <i class="bi bi-broadcast me-1"></i>
+                      Command Center
+                 </a>
+
+
+                 <a
+                     href="{{ url_for('organizer_registrations', event_id=event.id) }}"
+                     class="btn btn-ghost"
+                     title="View participants"
+                 >
+                     <i class="bi bi-people"></i>
+                 </a>
+
+
+                 <a
+                     href="{{ url_for('organizer_analytics', event_id=event.id) }}"
+                     class="btn btn-ghost"
+                     title="View analytics"
+                 >
+                     <i class="bi bi-bar-chart-line"></i>
+                 </a>
+
+
+                 <a
+                      href="{{ url_for('organizer_gallery', event_id=event.id) }}"
+                      class="btn btn-ghost"
+                      title="Event gallery"
+                 >
+                     <i class="bi bi-images"></i>
+                 </a>
+
+                </div>
+            </div>
+
+        </article>
+
+
+        {% else %}
+
+
+        <!-- EMPTY STATE -->
+
+        <div class="cardx organizer-events-empty">
+
+            <div class="organizer-events-empty-icon">
+                <i class="bi bi-calendar2-plus"></i>
+            </div>
+
+            <h3 class="mt-4 mb-2">
+                No events yet
+            </h3>
+
+            <p class="muted mb-4">
+                Create your first event and start managing registrations,
+                attendance and event operations.
+            </p>
+
+            <a
+                href="{{ url_for('create_event') }}"
+                class="btn btn-brand"
+            >
+                <i class="bi bi-plus-lg me-1"></i>
+                Create Event
+            </a>
+
+        </div>
+
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
