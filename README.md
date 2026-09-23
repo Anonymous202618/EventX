@@ -66,3 +66,20 @@ Change passwords and SECRET_KEY before any real deployment.
 
 ## Important note
 The core application is self-contained. CDN libraries are used only for rich browser-side features (charts, calendar and QR camera scanning). Google Calendar, GitHub, SMTP email and production PostgreSQL are left as integration points rather than fake implementations.
+
+
+
+
+## Documentation
+
+The complete EventX User Guide is available here:
+
+[📖 EventX User Guide](docs/EventX_User_Guide.pdf)
+
+The guide explains how to use EventX as an Admin, Organizer, or Student and covers event management, registration, waitlists, QR attendance, notifications, certificates, competitions, resources, sponsorships, analytics, reports, and troubleshooting.## Documentation
+
+The complete EventX User Guide is available here:
+
+[📖 EventX User Guide](docs/EventX_User_Guide.pdf)
+
+The guide explains how to use EventX as an Admin, Organizer, or Student and covers event management, registration, waitlists, QR attendance, notifications, certificates, competitions, resources, sponsorships, analytics, reports, and troubleshooting.
