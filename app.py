@@ -28,23 +28,41 @@ IS_VERCEL = os.getenv("VERCEL") == "1"
 if IS_VERCEL:
     DB_PATH = Path("/tmp/eventx.db")
     UPLOAD_PATH = Path("/tmp/eventx_uploads")
+
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is not configured on Vercel.")
+
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace(
+            "postgresql://",
+            "postgresql+psycopg://",
+            1
+        )
+    elif database_url.startswith("postgres://"):
+        database_url = database_url.replace(
+            "postgres://",
+            "postgresql+psycopg://",
+            1
+        )
 else:
     DB_PATH = BASE_DIR / "instance" / "eventx.db"
     UPLOAD_PATH = BASE_DIR / "static" / "uploads"
+    database_url = f"sqlite:///{DB_PATH}"
 
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-change-me")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL",
-    f"sqlite:///{DB_PATH}"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_PATH)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
 UPLOAD_PATH.mkdir(parents=True, exist_ok=True) 
 db.init_app(app)
+with app.app_context():
+    db.create_all()
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Please log in to continue."
